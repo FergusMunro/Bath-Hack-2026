@@ -1,27 +1,46 @@
 import numpy as np
+import copy
 
 from data import *
 
 alpha = 1
 beta = 1
+gamma = 1
+
+flightCapacity = 0.186
 
 
 class FlightPath:  # circular flight path
-    def __init__(self, start, end, fuelUse, revenue, easeOfReplacement):
+    def __init__(self, start, end, fuelUse, revenue, easeOfReplacement, demand):
         self.start = start
         self.end = end
         self.fuelUse = fuelUse
         self.revenue = revenue
         self.easeOfReplacement = easeOfReplacement
+        self.DEMAND = demand
 
     def getProfit(self):
         profit = 0
-        cost = path.fuelUse * (self.start.fuelCost + self.end.fuelCost)
-        profit += path.revenue - cost
+        cost = self.fuelUse * (self.start.fuelCost + self.end.fuelCost)
+        profit += self.revenue - cost
         return profit
 
     def getTotalFuelUse(self):
         return 2 * self.fuelUse
+
+    def calculateHeuristic(self, numFlights):
+
+        unfilledDemmand = numFlights * flightCapacity - self.DEMAND  # need to normalize
+
+        profit_norm = self.getProfit()  # need to normalize
+        unfilled_demand_norm = 0
+        heuristic = (
+            alpha * profit_norm
+            + beta * self.easeOfReplacement
+            + gamma * unfilled_demand_norm
+        )
+
+        return heuristic / self.getTotalFuelUse()
 
 
 class Terminal:
@@ -52,7 +71,9 @@ for i in range(num_cities):
         end_terminal = terminals[j]
         fuel_use = fuelmatrix[i, j]
         # Revenue proportional to demand
-        revenue = demandmatrix[i, j] * 1000  # scale to realistic number
+        revenue = 1000  # scale to realistic number
+        demand = demandmatrix[i, j]
+
         # Ease of replacement: 1 = easy to replace, 0 = hard to replace
         easeOfReplacement = subsitutionElasticityMatrix[i, j]
         path = FlightPath(
@@ -61,6 +82,7 @@ for i in range(num_cities):
             fuelUse=fuel_use,
             revenue=revenue,
             easeOfReplacement=easeOfReplacement,
+            demand=demand,
         )
         flight_paths[i, j] = path
 
@@ -74,6 +96,9 @@ routeMatrix = [
 ]
 
 
+backup = copy.deepcopy(routeMatrix)
+
+
 def calculateFuelCost(cityIndex):
     fuel = 0
     for i in range(cityIndex):
@@ -83,25 +108,23 @@ def calculateFuelCost(cityIndex):
     return fuel
 
 
-def calculateHeuristic(flight_path):
-
-    profit_norm = flight_path.getProfit()
-    heuristic = alpha * profit_norm + beta * flight_path.easeOfReplacement
-    return heuristic
-
-
 def getMin(arr, excluded):
+    excluded = set(excluded)
+    return min(
+        (i for i in range(len(arr)) if i not in excluded),
+        key=lambda i: arr[i],
+        default=-1,
+    )
 
-    min = 0
-    index = 0
-    for i in range(len(arr)):
-        if i in excluded:
-            pass
-        else:
-            if arr[i] < min:
-                min = arr[i]
-                index = i
-    return index
+
+def getMaxProfit():
+    minP = 999999
+    maxP = -9999
+    for i in range(num_cities):
+        for j in range(i):
+            minP = min(flight_paths[i, j], minP)
+        for k in range(i + 1, num_cities, 1):
+            minP = min(flight_paths[k, i])
 
 
 def minimizeDisrupted(routeMatrix):
@@ -115,27 +138,31 @@ def minimizeDisrupted(routeMatrix):
 
         for i in range(num_cities):
 
-            # if this guy is already below budget then chill out
+            # if this guy is already below fuel budget then don't need to do anything
             if fuelArray[i] < 0:
                 continue
 
             heuristics = np.zeros(num_cities)
             for k in range(i):
-                heuristics[k] += flight_paths[i, k].getTotalFuelUse()
+                heuristics[k] += flight_paths[i, k].calculateHeuristic(
+                    routeMatrix[i][k]
+                )
 
             for k in range(i + 1, num_cities, 1):
-                heuristics[k] = flight_paths[k, i].getTotalFuelUse()
+                heuristics[k] = flight_paths[k, i].calculateHeuristic(routeMatrix[k][i])
 
             excluded = [i]
             while True:
-                rem = getMin(heuristics, excluded)
+                removeFlight = getMin(heuristics, excluded)
 
-                if fuelArray[rem] < 0:
-                    excluded.append(rem)
+                if fuelArray[removeFlight] < 0:
+                    excluded.append(removeFlight)
                 else:
-                    pass
+                    if removeFlight == -1:
+                        excluded = [i]
+                        removeFlight = getMin(heuristics, excluded)
+                    break
 
-            removeFlight = np.argmin(heuristics)
             if removeFlight < i:
                 routeMatrix[i][removeFlight] -= 1
                 fuelArray[i] -= flight_paths[i, removeFlight].fuelUse
@@ -144,7 +171,12 @@ def minimizeDisrupted(routeMatrix):
                 routeMatrix[removeFlight][i] -= 1
                 fuelArray[i] -= flight_paths[removeFlight, i].fuelUse
                 fuelArray[removeFlight] -= flight_paths[removeFlight, i].fuelUse
-    print(fuelArray)
+    diff = np.array(backup) - np.array(routeMatrix)
+
+    for i in range(num_cities):
+        for j in range(i):
+            if diff[i][j] > 0:
+                print(f"{cities[i]} ↔ {cities[j]}: removed {diff[i][j]} flights")
 
 
 minimizeDisrupted(routeMatrix)
