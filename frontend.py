@@ -1,5 +1,5 @@
 from PyQt6.QtWidgets import QApplication, QPushButton, QWidget, QLabel, QLineEdit
-from PyQt6.QtGui import QIcon, QPixmap, QPainter, QColor
+from PyQt6.QtGui import QIcon, QPainterPath, QPixmap, QPainter, QColor
 from PyQt6 import QtCore
 import os
 import sys
@@ -133,24 +133,39 @@ class Overlay(QWidget):
 
         painter = QPainter(self)
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
-        painter.setPen(QColor("red"))
+        painter.setPen(QColor("blue"))
         painter.setBrush(QtCore.Qt.BrushStyle.NoBrush)
 
-        # Draw arcs between every pair of cities
+        # Draw lines between every pair of cities
         for i in range(5):
             x, y = self.locations[i]
             for j in range(i+1, 5):
                 tx, ty = self.locations[j]
 
-                w = tx - x
-                h = ty - y
-                painter.drawArc(x, y, w, h, self.start*16, self.span*16)
-                
                 if(backend.subsitutionElasticityMatrix[i][j]!=0.001):
                     painter.setPen(QColor("blue"))
                     painter.drawLine(x, y, tx, ty)
                     painter.setPen(QColor("red"))
                 
+        painter.setPen(QColor("red"))
+        for i in range(5):
+            x1, y1 = self.locations[i]
+            for j in range(i+1, 5):
+                x2, y2 = self.locations[j]
+
+                # Midpoint
+                mx = (x1 + x2) / 2
+                my = (y1 + y2) / 2
+
+                # Raise midpoint upward to create a curve
+                cx = mx
+                cy = my - 80   # adjust curvature
+
+                path = QPainterPath()
+                path.moveTo(x1, y1)
+                path.quadTo(cx, cy, x2, y2)
+
+                painter.drawPath(path)
 
                
 
