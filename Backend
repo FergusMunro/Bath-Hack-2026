@@ -1,44 +1,52 @@
 from PyQt6.QtWidgets import QApplication, QWidget, QLabel
 from PyQt6.QtGui import QPixmap
 import os
+import sys
 
-def getImagePath(imageName):
-    path = os.getcwd()
-    path = path + ("/Images/"+imageName)
-    path = path.replace("\\","/")
-    print(path)
-    return path
+class MainWindow(QWidget):
+    def __init__(self):
+        super().__init__()
+        # Initialize your labels as class variables so resizeEvent can see them
+        self.label = QLabel(self)
+        self.rect = QLabel(self)
+        self.initUI()
 
+    def getImagePath(self, imageName):
+        path = os.getcwd()
+        path = path + ("/Images/" + imageName)
+        path = path.replace("\\", "/")
+        return path
 
-app = QApplication([])
+    def initUI(self):
+        self.setWindowTitle("Flight Cutter")
+        
+        # Setup the image label
+        pixmap = QPixmap(self.getImagePath("Europe.jpg"))
+        self.label.setPixmap(pixmap)
+        self.label.setScaledContents(True)
 
-screen = app.primaryScreen()
-geometry = screen.availableGeometry()
-size = geometry.size()
-width = geometry.width()
-height = geometry.height()
+        # Setup the white rectangle
+        self.rect.setStyleSheet("background-color: white;")
+        
+        # Trigger the first sizing manually
+        self.showMaximized()
 
-window = QWidget()
-window.resize(width, height)
-window.setWindowTitle("Flight Cutter")
+    def resizeEvent(self, event):
+        # This function now actually moves/resizes your labels 
+        # whenever the window changes size
+        width = self.width()
+        height = self.height()
 
-label = QLabel(window)
-pixmap = QPixmap(getImagePath("Europe.jpg"))
+        # Update Image Label (75% width)
+        self.label.resize(int(width * 0.75), height)
+        self.label.move(0, 0)
 
-# Scale image if you want
-label.setPixmap(pixmap)
-label.setScaledContents(True)  # image stretches with window
-label.resize(int(width*0.75),int(height))
+        # Update White Rectangle (25% width)
+        self.rect.resize(int(width * 0.25), height)
+        self.rect.move(int(width * 0.75), 0)
 
-# Move the image inside the window
-label.move(0,0)  # x=50, y=50
-
-#white rectangle label
-rect = QLabel(window)
-rect.resize(int(width*0.25),int(height))
-rect.move(int(width*0.75),0)
-rect.setStyleSheet("background-color: white;")
-
-
-window.showMaximized()
-app.exec()
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    window = MainWindow()
+    window.show()
+    sys.exit(app.exec())
