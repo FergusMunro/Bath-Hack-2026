@@ -112,6 +112,7 @@ class MainWindow(QWidget):
             border-radius: 5px;              /* rounded corners */
             """)'''
         
+        #scroll window stuff
         for i in range(len(data.cities)):
             object = QLabel(data.cities[i])
             self.vbox.addWidget(object)
