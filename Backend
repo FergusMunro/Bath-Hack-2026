@@ -1,0 +1,35 @@
+from PyQt6.QtWidgets import QApplication, QWidget, QLabel
+from PyQt6.QtGui import QPixmap
+
+app = QApplication([])
+
+screen = app.primaryScreen()
+geometry = screen.availableGeometry()
+size = geometry.size()
+width = geometry.width()
+height = geometry.height()
+
+window = QWidget()
+window.resize(width, height)
+window.setWindowTitle("Flight Cutter")
+
+label = QLabel(window)
+pixmap = QPixmap("C:/Users/mwhea/Bath hack/Screenshot 2026-03-28 132009.jpg")
+
+# Scale image if you want
+label.setPixmap(pixmap)
+label.setScaledContents(True)  # image stretches with window
+label.resize(int(width*0.75),int(height))
+
+# Move the image inside the window
+label.move(0,0)  # x=50, y=50
+
+#white rectangle label
+rect = QLabel(window)
+rect.resize(int(width*0.25),int(height))
+rect.move(int(width*0.75),0)
+rect.setStyleSheet("background-color: white;")
+
+
+window.showMaximized()
+app.exec()
