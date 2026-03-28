@@ -1,3 +1,4 @@
+
 from PyQt6.QtWidgets import QApplication, QPushButton, QScrollArea, QWidget, QLabel, QLineEdit, QMenu, QWidgetAction, QVBoxLayout
 from PyQt6.QtGui import QIcon, QPainterPath, QPixmap, QPainter, QColor
 from PyQt6 import QtCore
@@ -7,7 +8,9 @@ import os
 import sys
 
 import backend
+import backendDataClass
 import data
+import backendDataClass
 
 class MainWindow(QWidget):
 
@@ -93,7 +96,7 @@ class MainWindow(QWidget):
             menu.addAction(action)
 
             # 3. Connect the button - now it won't close the whole window
-            confirm_btn.clicked.connect(lambda _, c=city, le=line_edit, fp=fuelPrice, m=menu:self.process_fuel(c, le, fp, m)
+            confirm_btn.clicked.connect(lambda _, c=city, le=line_edit, fp=fuelPrice, m=menu:self.update_all(c, le, fp, m)
 )
                
             city_button.setMenu(menu)
@@ -117,11 +120,6 @@ class MainWindow(QWidget):
             border: 2px solid gray;          /* border color and thickness */
             border-radius: 5px;              /* rounded corners */
             """)'''
-        
-        #scroll window stuff
-        for i in range(len(data.cities)):
-            object = QLabel(data.cities[i])
-            self.vbox.addWidget(object)
         
        # Sidebar scroll area
         self.scroll.setParent(self)  # make it a child of MainWindow
@@ -148,6 +146,15 @@ class MainWindow(QWidget):
             height: 12px;
         }
         """)
+        flightData = backend.doAnalysis()
+        clear_layout(self.vbox)
+        for i in range(len(flightData.cancelledFlights)):
+            for j in range(len(flightData.cancelledFlights[i])):
+             if i<j:
+              value = flightData.cancelledFlights[j][i]
+              if value > 0:
+               object = QLabel(f"{data.cities[i]} <> {data.cities[j]}: {value}")
+               self.vbox.addWidget(object)
         self.scroll.show()
 
         # Trigger the first sizing manually
@@ -214,19 +221,27 @@ class MainWindow(QWidget):
         self.overlay.update()
         self.scroll.setGeometry(int(width*0.77), int(height*0.08), int(width*0.22), int(height*0.8))
 
-    def process_fuel(self, city, line_edit, fuelPrice, menu):
-        try:
-            volume = int(line_edit.text())
-            cost = int(fuelPrice.text())
-        except ValueError:
-            print("Invalid input")
-            return
-
-        print(f"Fuel confirmed: {volume} {cost} {city.text()}")
-
-        for button in self.buttonList:
-            print(f"{button.city} : {button.fuelVolume.text()}")
+    def update_all(self, city, line_edit, fuelPrice, menu):
+        flightData = backend.doAnalysis()
+        print(flightData.cancelledFlights)
+        print("rgwroifwg")
+        clear_layout(self.vbox)
+        for i in range(len(flightData.cancelledFlights)):
+            for j in range(len(flightData.cancelledFlights[i])):
+             if i<j:
+              value = flightData.cancelledFlights[j][i]
+              if value > 0:
+               object = QLabel(f"{data.cities[i]} <> {data.cities[j]}: {value}")
+               self.vbox.addWidget(object)
         menu.close()
+
+    
+def clear_layout(layout):
+     while layout.count():
+        item = layout.takeAt(0)   # remove item from layout
+        widget = item.widget()
+        if widget is not None:
+            widget.deleteLater()  # safely delete widget
 
 class Overlay(QWidget):
     def __init__(self, parent=None):
@@ -251,9 +266,9 @@ class Overlay(QWidget):
         painter.setBrush(QtCore.Qt.BrushStyle.NoBrush)
 
         # Draw lines between every pair of cities
-        for i in range(5):
+        for i in range(len(self.locations)):
             x1, y1 = self.locations[i]
-            for j in range(i+1, 5):
+            for j in range(i+1, len(self.locations)):
                 x2, y2 = self.locations[j]
 
                 # Midpoint
