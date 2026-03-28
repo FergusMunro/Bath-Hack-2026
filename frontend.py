@@ -16,6 +16,11 @@ class MainWindow(QWidget):
         self.amsterdam = QPushButton(self)
         self.berlin = QPushButton(self)
         self.paris = QPushButton(self)
+        self.madrid = QPushButton(self)
+        self.reykjavik = QPushButton(self)
+        self.rome = QPushButton(self)
+        self.prague = QPushButton(self)
+        self.athens = QPushButton(self)
         self.overlay = Overlay(self)
         self.overlay.stackUnder(self.london)
         self.initUI()
@@ -39,7 +44,8 @@ class MainWindow(QWidget):
         self.rect.setStyleSheet("background-color: white;")
 
         # Setup capitals
-        for city_button in [self.london, self.glasgow, self.amsterdam, self.berlin, self.paris]:
+        for city_button in [self.london, self.glasgow, self.amsterdam, self.berlin, self.paris, 
+                            self.madrid,self.reykjavik,self.rome,self.prague,self.athens]:
             city_button.setStyleSheet((f"background-color: red; border-radius: 0px"))
             menu = QMenu(self)
             
@@ -102,13 +108,20 @@ class MainWindow(QWidget):
         self.label.move(0, 0)
 
         #update capitals
-        for city in [self.london, self.glasgow, self.amsterdam, self.berlin, self.paris]:
+        for city in [self.london, self.glasgow, self.amsterdam, self.berlin, self.paris, 
+                            self.madrid,self.reykjavik,self.rome,self.prague,self.athens]:
             city.resize(int(width*0.01),int(width*0.01))
         self.london.move(int(width*0.235),int(height*0.52))
         self.glasgow.move(int(width*0.212),int(height*0.39))
         self.amsterdam.move(int(width*0.298),int(height*0.515))
         self.berlin.move(int(width*0.4),int(height*0.515))
         self.paris.move(int(width*0.255),int(height*0.615))
+
+        self.madrid.move(int(width*0.135),int(height*0.8))
+        self.reykjavik.move(int(width*0.12),int(height*0.09))
+        self.rome.move(int(width*0.387),int(height*0.81))
+        self.prague.move(int(width*0.41),int(height*0.588))
+        self.athens.move(int(width*0.55),int(height*0.9))
         
 
         # Update White Rectangle (25% width)
@@ -140,11 +153,11 @@ class MainWindow(QWidget):
         self.overlay.resize(self.label.size())
         self.overlay.move(self.label.pos())
         self.overlay.locations = [
-            (int(width*0.235), int(height*0.52)),   # London
-            (int(width*0.212), int(height*0.39)),   # Glasgow
-            (int(width*0.298), int(height*0.515)),  # Amsterdam
-            (int(width*0.4),   int(height*0.515)),  # Berlin
-            (int(width*0.255), int(height*0.615)),  # Paris
+            (int(self.width*0.235), int(self.height*0.52)),   # London
+            (int(self.width*0.212), int(self.height*0.39)),   # Glasgow
+            (int(self.width*0.298), int(self.height*0.515)),  # Amsterdam
+            (int(self.width*0.4),   int(self.height*0.515)),  # Berlin
+            (int(self.width*0.255), int(self.height*0.615)),  # Paris
         ]
 
         self.overlay.update()
