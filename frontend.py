@@ -4,7 +4,6 @@ from PyQt6 import QtCore
 
 import os
 import sys
-from algorithm import backend
 
 class MainWindow(QWidget):
     def __init__(self):
@@ -67,11 +66,21 @@ class MainWindow(QWidget):
             city_button.setMenu(menu)
 
         # Sidebar stuff
-        self.passengersDisrupted = QLabel(self)
-        self.passengersTransported = QLabel(self)
-        self.totalRevenueLost = QLabel(self)
+        self.button1 = QLabel(self)
+        self.button1T = QLabel("1",self)
+        self.button2 = QLabel(self)
+        self.button2T = QLabel("2",self)
+        self.button3 = QLabel(self)
+        self.button3T = QLabel("3",self)
 
-        for boxes in [self.passengersDisrupted,self.passengersTransported,self.totalRevenueLost]:
+        for boxes in [self.button1T,self.button2T,self.button3T]:
+            boxes.setStyleSheet("""
+            color: black;
+            font-size: 22px;
+            font-weight: bold;
+            """)
+
+        for boxes in [self.button1,self.button2,self.button3]:
             boxes.setStyleSheet("""
             background-color: lightyellow;   /* background color */
             color: darkblue;                 /* text color */
@@ -107,12 +116,19 @@ class MainWindow(QWidget):
         self.rect.move(int(width * 0.75), 0)
 
         rect_x = int(width * 0.777)
-        rect_y = int(height*0.05)
-        for boxes in [self.passengersDisrupted,self.passengersTransported,self.totalRevenueLost]:
+        rect_y = int(height*0.08)
+        for boxes in [self.button1,self.button2,self.button3]:
             boxes.resize(int(width*0.2),int(height*0.06))
-        self.passengersDisrupted.move(rect_x,rect_y)
-        self.passengersTransported.move(rect_x,rect_y+int(height*0.1))
-        self.totalRevenueLost.move(rect_x,rect_y+int(height*0.2))
+            self.button1.move(rect_x,rect_y)
+            self.button2.move(rect_x,rect_y+int(height*0.12))
+            self.button3.move(rect_x,rect_y+int(height*0.24))
+
+        for boxes in [self.button1T,self.button2T,self.button3T]:
+            self.button1T.move(rect_x,rect_y-int(height*0.05))
+            self.button2T.move(rect_x,rect_y+int(height*0.07))
+            self.button3T.move(rect_x,rect_y+int(height*0.19))
+
+        
 
     def process_fuel(self, line_edit, button, menu):
         amount = line_edit.text()
