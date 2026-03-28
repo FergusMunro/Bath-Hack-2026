@@ -10,12 +10,12 @@ import sys
 import backend
 import backendDataClass
 import data
-import backendDataClass
+from backendDataClass import BackEndData
 
 class MainWindow(QWidget):
 
     buttonList  = list()
-
+    availableFlights = []
     def __init__(self):
         super().__init__()
         # Initialize your labels as class variables so resizeEvent can see them
@@ -37,6 +37,11 @@ class MainWindow(QWidget):
         self.widget = QWidget()                 # Widget that contains the collection of Vertical Box
         self.vbox = QVBoxLayout() 
         self.initUI()
+        self.availableFlights = data.routeMatrix
+
+        self.overlay.buttonList = self.buttonList
+        self.overlay.availableFlights = self.availableFlights
+
 
     def getImagePath(self, imageName):
         path = os.getcwd()
@@ -256,19 +261,31 @@ class Overlay(QWidget):
         self.start = 0
         self.span = 120
 
-    def paintEvent(self, event):
-        if len(self.locations) < 5:
-            return
+        self.BackEndData = backend.doAnalysis()
 
+    def paintEvent(self, event):
+        
         painter = QPainter(self)
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
         painter.setPen(QColor("red"))
         painter.setBrush(QtCore.Qt.BrushStyle.NoBrush)
 
         # Draw lines between every pair of cities
-        for i in range(len(self.locations)):
+        for i in range(5):#for i in range(len(self.locations)):
+            #only 5 cities have data
             x1, y1 = self.locations[i]
-            for j in range(i+1, len(self.locations)):
+            for j in range(i+1, 5):#for j in range(i+1, len(self.locations)):
+                #only 5 cities have data
+                firstCity = self.buttonList[i].city
+                secondCity = self.buttonList[j].city
+                
+                cancelled  = self.BackEndData.getCancelledFlights(firstCity,secondCity)
+                if(self.availableFlights[i][j]==0):
+                    opacity = 0.5
+                else:
+                    opacity = (self.availableFlights[i][j] -cancelled )/ self.availableFlights[i][j]
+                painter.setOpacity(opacity)
+                print(opacity)
                 x2, y2 = self.locations[j]
 
                 # Midpoint
@@ -292,7 +309,7 @@ class Buttons:
         self.fuelVolume = fuelVolume
         self.fuelCost = fuelCost
         self.menu = menu
-        self.city = city
+        self.city = city 
 
     
 
