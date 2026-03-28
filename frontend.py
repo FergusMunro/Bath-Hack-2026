@@ -90,8 +90,7 @@ class MainWindow(QWidget):
             # 3. Connect the button - now it won't close the whole window
             confirm_btn.clicked.connect(lambda _, c=city, le=line_edit, fp=fuelPrice, m=menu:self.process_fuel(c, le, fp, m)
 )
-
-            
+               
             city_button.setMenu(menu)
 
         # Sidebar stuff
@@ -126,6 +125,22 @@ class MainWindow(QWidget):
 
         self.widget.setLayout(self.vbox)
         self.scroll.setWidget(self.widget)
+        self.scroll.setStyleSheet("""
+        QScrollBar:vertical {
+            background: #f0f0f0;
+            width: 12px;
+            border-radius: 6px;
+        }
+        QScrollBar::handle:vertical {
+            background: #555;
+            min-height: 30px;
+            border-radius: 6px;
+        }
+        QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+            background: #aaa;
+            height: 12px;
+        }
+        """)
         self.scroll.show()
 
         # Trigger the first sizing manually
