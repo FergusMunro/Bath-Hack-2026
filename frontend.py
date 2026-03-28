@@ -87,6 +87,13 @@ class MainWindow(QWidget):
         self.rect.resize(int(width * 0.25), height)
         self.rect.move(int(width * 0.75), 0)
 
+    def process_fuel(self, line_edit, button, menu):
+        amount = line_edit.text()
+        print(f"Fuel confirmed: {amount}")
+        
+        # Now close ONLY the menu, not the window
+        menu.close()
+
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = MainWindow()
