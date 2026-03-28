@@ -39,21 +39,18 @@ class MainWindow(QWidget):
         for city in [self.london, self.glasgow, self.amsterdam, self.berlin, self.paris]:
             city.setStyleSheet((f"background-color: red; border-radius: 0px"))
 
-        # Create a text input field
-        self.input_field1 = QLineEdit(self)
-        self.input_field1.setPlaceholderText("Glasgow Fuel Amount")
+        # Sidebar stuff
+        self.passengersDisrupted = QLabel(self)
+        self.passengersTransported = QLabel(self)
+        self.totalRevenueLost = QLabel(self)
 
-        self.input_field2 = QLineEdit(self)
-        self.input_field2.setPlaceholderText("London Fuel Amount")
-
-        self.input_field3 = QLineEdit(self)
-        self.input_field3.setPlaceholderText("Amsterdam Fuel Amount")
-
-        self.input_field4 = QLineEdit(self)
-        self.input_field4.setPlaceholderText("Paris Fuel Amount")
-
-        self.input_field5 = QLineEdit(self)
-        self.input_field5.setPlaceholderText("Berlin Fuel Amount")
+        for boxes in [self.passengersDisrupted,self.passengersTransported,self.totalRevenueLost]:
+            boxes.setStyleSheet("""
+            background-color: lightyellow;   /* background color */
+            color: darkblue;                 /* text color */
+            border: 2px solid gray;          /* border color and thickness */
+            border-radius: 5px;              /* rounded corners */
+            """)
 
         #limit how small the window can be resized to
         self.setMinimumSize(800, 600)
@@ -79,23 +76,18 @@ class MainWindow(QWidget):
         self.amsterdam.move(int(width*0.298),int(height*0.515))
         self.berlin.move(int(width*0.4),int(height*0.515))
         self.paris.move(int(width*0.255),int(height*0.615))
-        
 
         # Update White Rectangle (25% width)
         self.rect.resize(int(width * 0.25), height)
         self.rect.move(int(width * 0.75), 0)
 
-        rect_x = int(width * 0.75)
-        self.input_field1.resize(250, 40)
-        self.input_field1.move(rect_x + 20, 50)
-        self.input_field2.resize(250, 40)
-        self.input_field2.move(rect_x + 20, 100)
-        self.input_field3.resize(250, 40)
-        self.input_field3.move(rect_x + 20, 150)
-        self.input_field4.resize(250, 40)
-        self.input_field4.move(rect_x + 20, 200)
-        self.input_field5.resize(250, 40)
-        self.input_field5.move(rect_x + 20, 250)
+        rect_x = int(width * 0.777)
+        rect_y = int(height*0.05)
+        for boxes in [self.passengersDisrupted,self.passengersTransported,self.totalRevenueLost]:
+            boxes.resize(int(width*0.2),int(height*0.06))
+        self.passengersDisrupted.move(rect_x,rect_y)
+        self.passengersTransported.move(rect_x,rect_y+int(height*0.1))
+        self.totalRevenueLost.move(rect_x,rect_y+int(height*0.2))
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
