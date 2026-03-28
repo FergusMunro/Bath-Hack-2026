@@ -78,8 +78,9 @@ def calculateFuelCost(cityIndex):
     fuel = 0
     for i in range(cityIndex):
         fuel += flight_paths[cityIndex, i].getTotalFuelUse()
-    for j in range(cityIndex + 1, num_cities - 1, 1):
+    for j in range(cityIndex + 1, num_cities, 1):
         fuel += flight_paths[j, cityIndex].getTotalFuelUse()
+    return fuel
 
 
 def calculateHeuristic(flight_path):
@@ -89,12 +90,61 @@ def calculateHeuristic(flight_path):
     return heuristic
 
 
+def getMin(arr, excluded):
+
+    min = 0
+    index = 0
+    for i in range(len(arr)):
+        if i in excluded:
+            pass
+        else:
+            if arr[i] < min:
+                min = arr[i]
+                index = i
+    return index
+
+
 def minimizeDisrupted(routeMatrix):
 
     fuelArray = np.zeros(num_cities)
-    print(fuelArray)
     for i in range(num_cities):
-        fuelArray[i] = calculateFuelCost(i)
+        fuelArray[i] = calculateFuelCost(i) - terminals[i].fuelAvailability
+    # now our goal is to find the way to find the optimal way to make these zero
+
+    while (fuelArray > 0).any():
+
+        for i in range(num_cities):
+
+            # if this guy is already below budget then chill out
+            if fuelArray[i] < 0:
+                continue
+
+            heuristics = np.zeros(num_cities)
+            for k in range(i):
+                heuristics[k] += flight_paths[i, k].getTotalFuelUse()
+
+            for k in range(i + 1, num_cities, 1):
+                heuristics[k] = flight_paths[k, i].getTotalFuelUse()
+
+            excluded = [i]
+            while True:
+                rem = getMin(heuristics, excluded)
+
+                if fuelArray[rem] < 0:
+                    excluded.append(rem)
+                else:
+                    pass
+
+            removeFlight = np.argmin(heuristics)
+            if removeFlight < i:
+                routeMatrix[i][removeFlight] -= 1
+                fuelArray[i] -= flight_paths[i, removeFlight].fuelUse
+                fuelArray[removeFlight] -= flight_paths[i, removeFlight].fuelUse
+            else:
+                routeMatrix[removeFlight][i] -= 1
+                fuelArray[i] -= flight_paths[removeFlight, i].fuelUse
+                fuelArray[removeFlight] -= flight_paths[removeFlight, i].fuelUse
+    print(fuelArray)
 
 
 minimizeDisrupted(routeMatrix)
