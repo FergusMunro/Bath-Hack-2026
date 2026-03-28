@@ -1,6 +1,7 @@
-from PyQt6.QtWidgets import QApplication, QPushButton, QWidget, QLabel, QLineEdit, QMenu, QWidgetAction, QVBoxLayout
+from PyQt6.QtWidgets import QApplication, QPushButton, QScrollArea, QWidget, QLabel, QLineEdit, QMenu, QWidgetAction, QVBoxLayout
 from PyQt6.QtGui import QIcon, QPainterPath, QPixmap, QPainter, QColor
 from PyQt6 import QtCore
+from PyQt6.QtCore import Qt
 
 import os
 import sys
@@ -9,6 +10,9 @@ import backend
 import data
 
 class MainWindow(QWidget):
+
+    buttonList  = list()
+
     def __init__(self):
         super().__init__()
         # Initialize your labels as class variables so resizeEvent can see them
@@ -26,6 +30,9 @@ class MainWindow(QWidget):
         self.athens = QPushButton(self)
         self.overlay = Overlay(self)
         self.overlay.stackUnder(self.london)
+        self.scroll = QScrollArea()             # Scroll Area which contains the widgets, set as the centralWidget
+        self.widget = QWidget()                 # Widget that contains the collection of Vertical Box
+        self.vbox = QVBoxLayout() 
         self.initUI()
 
     def getImagePath(self, imageName):
@@ -67,12 +74,14 @@ class MainWindow(QWidget):
 
             fuelPrice = QLineEdit()
             fuelPrice.setPlaceholderText("Enter the fuel price in £")
-
+            
             city = QLabel(data.cities[i])
             i=i+1
             
             confirm_btn = QPushButton("Confirm")
             
+            self.buttonList.append(Buttons(confirm_btn,line_edit,fuelPrice,menu,city.text()))
+
             layout.addWidget(city)
             layout.addWidget(line_edit)
             layout.addWidget(fuelPrice)
@@ -84,17 +93,15 @@ class MainWindow(QWidget):
             menu.addAction(action)
 
             # 3. Connect the button - now it won't close the whole window
-            confirm_btn.clicked.connect(lambda checked, le=line_edit, b=city_button, m=menu: self.process_fuel(le, b, m))
-            
+            confirm_btn.clicked.connect(lambda _, c=city, le=line_edit, fp=fuelPrice, m=menu:self.process_fuel(c, le, fp, m)
+)
+               
             city_button.setMenu(menu)
 
         # Sidebar stuff
-        self.button1 = QLabel(self)
-        self.button1T = QLabel("1",self)
-        self.button2 = QLabel(self)
-        self.button2T = QLabel("2",self)
-        self.button3 = QLabel(self)
-        self.button3T = QLabel("3",self)
+        self.button1T = QLabel("Flights Cancelled:",self)
+        self.button2T = QLabel("Total Revenue Lost:",self)
+        self.button3T = QLabel(self)
 
         for boxes in [self.button1T,self.button2T,self.button3T]:
             boxes.setStyleSheet("""
@@ -103,13 +110,45 @@ class MainWindow(QWidget):
             font-weight: bold;
             """)
 
-        for boxes in [self.button1,self.button2,self.button3]:
+        '''for boxes in [self.button1,self.button2,self.button3]:
             boxes.setStyleSheet("""
             background-color: lightyellow;   /* background color */
             color: darkblue;                 /* text color */
             border: 2px solid gray;          /* border color and thickness */
             border-radius: 5px;              /* rounded corners */
-            """)
+            """)'''
+        
+        #scroll window stuff
+        for i in range(len(data.cities)):
+            object = QLabel(data.cities[i])
+            self.vbox.addWidget(object)
+        
+       # Sidebar scroll area
+        self.scroll.setParent(self)  # make it a child of MainWindow
+        self.scroll.setGeometry(int(self.width()*0.77), int(self.height()*0.15), int(self.width()*0.22), int(self.height()*0.7))
+        self.scroll.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOn)
+        self.scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.scroll.setWidgetResizable(True)
+
+        self.widget.setLayout(self.vbox)
+        self.scroll.setWidget(self.widget)
+        self.scroll.setStyleSheet("""
+        QScrollBar:vertical {
+            background: #f0f0f0;
+            width: 12px;
+            border-radius: 6px;
+        }
+        QScrollBar::handle:vertical {
+            background: #555;
+            min-height: 30px;
+            border-radius: 6px;
+        }
+        QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+            background: #aaa;
+            height: 12px;
+        }
+        """)
+        self.scroll.show()
 
         # Trigger the first sizing manually
         self.showMaximized()
@@ -147,16 +186,16 @@ class MainWindow(QWidget):
 
         rect_x = int(width * 0.777)
         rect_y = int(height*0.08)
-        for boxes in [self.button1,self.button2,self.button3]:
+        '''for boxes in [self.button1,self.button2,self.button3]:
             boxes.resize(int(width*0.2),int(height*0.06))
             self.button1.move(rect_x,rect_y)
             self.button2.move(rect_x,rect_y+int(height*0.12))
-            self.button3.move(rect_x,rect_y+int(height*0.24))
+            self.button3.move(rect_x,rect_y+int(height*0.24))'''
 
-        for boxes in [self.button1T,self.button2T,self.button3T]:
+        for boxes in [self.button1T]:
             self.button1T.move(rect_x,rect_y-int(height*0.05))
-            self.button2T.move(rect_x,rect_y+int(height*0.07))
-            self.button3T.move(rect_x,rect_y+int(height*0.19))
+            self.button2T.move(rect_x,rect_y+int(height*0.8))
+            self.button3T.move(rect_x,rect_y+int(height*0.85))
         
         self.overlay.resize(self.label.size())
         self.overlay.move(self.label.pos())
@@ -172,14 +211,21 @@ class MainWindow(QWidget):
             (int(self.width()*0.41), int(self.height()*0.588)),   # prague
             (int(self.width()*0.55), int(self.height()*0.9)),   # athens
         ]
+        self.overlay.update()
+        self.scroll.setGeometry(int(width*0.77), int(height*0.08), int(width*0.22), int(height*0.8))
 
-        self.overlay.update()    
+    def process_fuel(self, city, line_edit, fuelPrice, menu):
+        try:
+            volume = int(line_edit.text())
+            cost = int(fuelPrice.text())
+        except ValueError:
+            print("Invalid input")
+            return
 
-    def process_fuel(self, line_edit, button, menu):
-        amount = line_edit.text()
-        print(f"Fuel confirmed: {amount}")
-        
-        # Now close ONLY the menu, not the window
+        print(f"Fuel confirmed: {volume} {cost} {city.text()}")
+
+        for button in self.buttonList:
+            print(f"{button.city} : {button.fuelVolume.text()}")
         menu.close()
 
 class Overlay(QWidget):
@@ -224,7 +270,16 @@ class Overlay(QWidget):
 
                 painter.drawPath(path)
 
-               
+
+class Buttons:
+    def __init__(self, button, fuelVolume, fuelCost, menu, city):
+        self.button = button
+        self.fuelVolume = fuelVolume
+        self.fuelCost = fuelCost
+        self.menu = menu
+        self.city = city
+
+    
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
