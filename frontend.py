@@ -1,8 +1,9 @@
 from PyQt6.QtWidgets import QApplication, QPushButton, QWidget, QLabel, QLineEdit
-from PyQt6.QtGui import QIcon, QPixmap
-from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QIcon, QPixmap, QPainter, QColor
+from PyQt6 import QtCore
 import os
 import sys
+from algorithm import backend
 
 class MainWindow(QWidget):
     def __init__(self):
@@ -15,6 +16,8 @@ class MainWindow(QWidget):
         self.amsterdam = QPushButton(self)
         self.berlin = QPushButton(self)
         self.paris = QPushButton(self)
+        self.overlay = Overlay(self)
+        self.overlay.stackUnder(self.london)
         self.initUI()
 
     def getImagePath(self, imageName):
@@ -96,6 +99,60 @@ class MainWindow(QWidget):
         self.input_field4.move(rect_x + 20, 200)
         self.input_field5.resize(250, 40)
         self.input_field5.move(rect_x + 20, 250)
+
+        self.overlay.resize(self.label.size())
+        self.overlay.move(self.label.pos())
+        self.overlay.locations = [
+            (int(width*0.235), int(height*0.52)),   # London
+            (int(width*0.212), int(height*0.39)),   # Glasgow
+            (int(width*0.298), int(height*0.515)),  # Amsterdam
+            (int(width*0.4),   int(height*0.515)),  # Berlin
+            (int(width*0.255), int(height*0.615)),  # Paris
+        ]
+
+        self.overlay.update()
+
+
+
+class Overlay(QWidget):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setAttribute(QtCore.Qt.WidgetAttribute.WA_TransparentForMouseEvents)
+        self.setAttribute(QtCore.Qt.WidgetAttribute.WA_NoSystemBackground)
+        self.setAttribute(QtCore.Qt.WidgetAttribute.WA_TranslucentBackground)
+
+        # This will be filled by MainWindow.resizeEvent
+        self.locations = []  
+
+        self.start = 0
+        self.span = 120
+
+    def paintEvent(self, event):
+        if len(self.locations) < 5:
+            return
+
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+        painter.setPen(QColor("red"))
+        painter.setBrush(QtCore.Qt.BrushStyle.NoBrush)
+
+        # Draw arcs between every pair of cities
+        for i in range(5):
+            x, y = self.locations[i]
+            for j in range(i+1, 5):
+                tx, ty = self.locations[j]
+
+                w = tx - x
+                h = ty - y
+                painter.drawArc(x, y, w, h, self.start*16, self.span*16)
+                
+                if(backend.subsitutionElasticityMatrix[i][j]!=0.001):
+                    painter.setPen(QColor("blue"))
+                    painter.drawLine(x, y, tx, ty)
+                    painter.setPen(QColor("red"))
+                
+
+               
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
