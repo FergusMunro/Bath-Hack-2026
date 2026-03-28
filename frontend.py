@@ -37,7 +37,7 @@ class MainWindow(QWidget):
 
         # Setup capitals
         for city in [self.london, self.glasgow, self.amsterdam, self.berlin, self.paris]:
-            city.setStyleSheet((f" background-color: red;"))
+            city.setStyleSheet((f"background-color: red; border-radius: 0px"))
 
         # Create a text input field
         self.input_field1 = QLineEdit(self)
