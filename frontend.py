@@ -9,6 +9,7 @@ import sys
 
 import backend
 import data
+import backendDataClass
 
 class MainWindow(QWidget):
 
@@ -242,9 +243,9 @@ class Overlay(QWidget):
         painter.setBrush(QtCore.Qt.BrushStyle.NoBrush)
 
         # Draw lines between every pair of cities
-        for i in range(5):
+        for i in range(len(self.locations)):
             x1, y1 = self.locations[i]
-            for j in range(i+1, 5):
+            for j in range(i+1, len(self.locations)):
                 x2, y2 = self.locations[j]
 
                 # Midpoint
