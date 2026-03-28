@@ -1,5 +1,5 @@
-from PyQt6.QtWidgets import QApplication, QWidget, QLabel
-from PyQt6.QtGui import QPixmap
+from PyQt6.QtWidgets import QApplication, QMainWindow, QWidget, QLabel
+from PyQt6.QtGui import QIcon, QPixmap
 import os
 
 def getImagePath(imageName):
@@ -18,9 +18,10 @@ size = geometry.size()
 width = geometry.width()
 height = geometry.height()
 
-window = QWidget()
+window = QMainWindow()
 window.resize(width, height)
 window.setWindowTitle("Flight Cutter")
+window.setWindowIcon(QIcon(getImagePath("Plane.ico")))
 
 label = QLabel(window)
 pixmap = QPixmap(getImagePath("Europe.jpg"))
