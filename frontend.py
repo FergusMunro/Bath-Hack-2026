@@ -5,6 +5,8 @@ from PyQt6 import QtCore
 import os
 import sys
 
+import backend
+
 class MainWindow(QWidget):
     def __init__(self):
         super().__init__()
@@ -146,8 +148,18 @@ class MainWindow(QWidget):
             self.button1T.move(rect_x,rect_y-int(height*0.05))
             self.button2T.move(rect_x,rect_y+int(height*0.07))
             self.button3T.move(rect_x,rect_y+int(height*0.19))
-
         
+        self.overlay.resize(self.label.size())
+        self.overlay.move(self.label.pos())
+        self.overlay.locations = [
+            (int(self.width()*0.235), int(self.height()*0.52)),   # London
+            (int(self.width()*0.212), int(self.height()*0.39)),   # Glasgow
+            (int(self.width()*0.298), int(self.height()*0.515)),  # Amsterdam
+            (int(self.width()*0.4),   int(self.height()*0.515)),  # Berlin
+            (int(self.width()*0.255), int(self.height()*0.615)),  # Paris
+        ]
+
+        self.overlay.update()    
 
     def process_fuel(self, line_edit, button, menu):
         amount = line_edit.text()
@@ -155,20 +167,6 @@ class MainWindow(QWidget):
         
         # Now close ONLY the menu, not the window
         menu.close()
-
-        self.overlay.resize(self.label.size())
-        self.overlay.move(self.label.pos())
-        self.overlay.locations = [
-            (int(self.width*0.235), int(self.height*0.52)),   # London
-            (int(self.width*0.212), int(self.height*0.39)),   # Glasgow
-            (int(self.width*0.298), int(self.height*0.515)),  # Amsterdam
-            (int(self.width*0.4),   int(self.height*0.515)),  # Berlin
-            (int(self.width*0.255), int(self.height*0.615)),  # Paris
-        ]
-
-        self.overlay.update()
-
-
 
 class Overlay(QWidget):
     def __init__(self, parent=None):
