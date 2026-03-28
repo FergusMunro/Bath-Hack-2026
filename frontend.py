@@ -10,6 +10,9 @@ import backend
 import data
 
 class MainWindow(QWidget):
+
+    buttonList  = list()
+
     def __init__(self):
         super().__init__()
         # Initialize your labels as class variables so resizeEvent can see them
@@ -77,6 +80,8 @@ class MainWindow(QWidget):
             
             confirm_btn = QPushButton("Confirm")
             
+            self.buttonList.append(Buttons(confirm_btn,line_edit,fuelPrice,menu,city.text()))
+
             layout.addWidget(city)
             layout.addWidget(line_edit)
             layout.addWidget(fuelPrice)
@@ -198,6 +203,9 @@ class MainWindow(QWidget):
             return
 
         print(f"Fuel confirmed: {volume} {cost} {city.text()}")
+
+        for button in self.buttonList:
+            print(f"{button.city} : {button.fuelVolume.text()}")
         menu.close()
 
 class Overlay(QWidget):
@@ -242,7 +250,16 @@ class Overlay(QWidget):
 
                 painter.drawPath(path)
 
-               
+
+class Buttons:
+    def __init__(self, button, fuelVolume, fuelCost, menu, city):
+        self.button = button
+        self.fuelVolume = fuelVolume
+        self.fuelCost = fuelCost
+        self.menu = menu
+        self.city = city
+
+    
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
