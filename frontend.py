@@ -4,7 +4,6 @@ from PyQt6 import QtCore
 
 import os
 import sys
-from algorithm import backend
 
 class MainWindow(QWidget):
     def __init__(self):
@@ -17,6 +16,11 @@ class MainWindow(QWidget):
         self.amsterdam = QPushButton(self)
         self.berlin = QPushButton(self)
         self.paris = QPushButton(self)
+        self.madrid = QPushButton(self)
+        self.reykjavik = QPushButton(self)
+        self.rome = QPushButton(self)
+        self.prague = QPushButton(self)
+        self.athens = QPushButton(self)
         self.overlay = Overlay(self)
         self.overlay.stackUnder(self.london)
         self.initUI()
@@ -40,18 +44,25 @@ class MainWindow(QWidget):
         self.rect.setStyleSheet("background-color: white;")
 
         # Setup capitals
-        for city_button in [self.london, self.glasgow, self.amsterdam, self.berlin, self.paris]:
-            city_button.setStyleSheet((f"background-color: red; border-radius: 0px"))
+        for city_button in [self.london, self.glasgow, self.amsterdam, self.berlin, self.paris, 
+                            self.madrid,self.reykjavik,self.rome,self.prague,self.athens]:
+            city_button.setStyleSheet(""" 
+                                      QPushButton {background-color: red; border: none;}
+                                      QPushButton::menu-indicator {image: none; width: 0px;}
+                                      """)
             menu = QMenu(self)
+
             
             # 1. Create a container widget to hold BOTH the input and the button
             container = QWidget()
             layout = QVBoxLayout(container)
             
+            
             line_edit = QLineEdit()
             line_edit.setPlaceholderText("Enter fuel...")
             
             confirm_btn = QPushButton("Confirm")
+            
             
             layout.addWidget(line_edit)
             layout.addWidget(confirm_btn)
@@ -67,11 +78,21 @@ class MainWindow(QWidget):
             city_button.setMenu(menu)
 
         # Sidebar stuff
-        self.passengersDisrupted = QLabel(self)
-        self.passengersTransported = QLabel(self)
-        self.totalRevenueLost = QLabel(self)
+        self.button1 = QLabel(self)
+        self.button1T = QLabel("1",self)
+        self.button2 = QLabel(self)
+        self.button2T = QLabel("2",self)
+        self.button3 = QLabel(self)
+        self.button3T = QLabel("3",self)
 
-        for boxes in [self.passengersDisrupted,self.passengersTransported,self.totalRevenueLost]:
+        for boxes in [self.button1T,self.button2T,self.button3T]:
+            boxes.setStyleSheet("""
+            color: black;
+            font-size: 22px;
+            font-weight: bold;
+            """)
+
+        for boxes in [self.button1,self.button2,self.button3]:
             boxes.setStyleSheet("""
             background-color: lightyellow;   /* background color */
             color: darkblue;                 /* text color */
@@ -93,13 +114,20 @@ class MainWindow(QWidget):
         self.label.move(0, 0)
 
         #update capitals
-        for city in [self.london, self.glasgow, self.amsterdam, self.berlin, self.paris]:
+        for city in [self.london, self.glasgow, self.amsterdam, self.berlin, self.paris, 
+                            self.madrid,self.reykjavik,self.rome,self.prague,self.athens]:
             city.resize(int(width*0.01),int(width*0.01))
         self.london.move(int(width*0.235),int(height*0.52))
         self.glasgow.move(int(width*0.212),int(height*0.39))
         self.amsterdam.move(int(width*0.298),int(height*0.515))
         self.berlin.move(int(width*0.4),int(height*0.515))
         self.paris.move(int(width*0.255),int(height*0.615))
+
+        self.madrid.move(int(width*0.135),int(height*0.8))
+        self.reykjavik.move(int(width*0.12),int(height*0.09))
+        self.rome.move(int(width*0.387),int(height*0.81))
+        self.prague.move(int(width*0.41),int(height*0.588))
+        self.athens.move(int(width*0.55),int(height*0.9))
         
 
         # Update White Rectangle (25% width)
@@ -107,12 +135,19 @@ class MainWindow(QWidget):
         self.rect.move(int(width * 0.75), 0)
 
         rect_x = int(width * 0.777)
-        rect_y = int(height*0.05)
-        for boxes in [self.passengersDisrupted,self.passengersTransported,self.totalRevenueLost]:
+        rect_y = int(height*0.08)
+        for boxes in [self.button1,self.button2,self.button3]:
             boxes.resize(int(width*0.2),int(height*0.06))
-        self.passengersDisrupted.move(rect_x,rect_y)
-        self.passengersTransported.move(rect_x,rect_y+int(height*0.1))
-        self.totalRevenueLost.move(rect_x,rect_y+int(height*0.2))
+            self.button1.move(rect_x,rect_y)
+            self.button2.move(rect_x,rect_y+int(height*0.12))
+            self.button3.move(rect_x,rect_y+int(height*0.24))
+
+        for boxes in [self.button1T,self.button2T,self.button3T]:
+            self.button1T.move(rect_x,rect_y-int(height*0.05))
+            self.button2T.move(rect_x,rect_y+int(height*0.07))
+            self.button3T.move(rect_x,rect_y+int(height*0.19))
+
+        
 
     def process_fuel(self, line_edit, button, menu):
         amount = line_edit.text()
@@ -124,11 +159,11 @@ class MainWindow(QWidget):
         self.overlay.resize(self.label.size())
         self.overlay.move(self.label.pos())
         self.overlay.locations = [
-            (int(width*0.235), int(height*0.52)),   # London
-            (int(width*0.212), int(height*0.39)),   # Glasgow
-            (int(width*0.298), int(height*0.515)),  # Amsterdam
-            (int(width*0.4),   int(height*0.515)),  # Berlin
-            (int(width*0.255), int(height*0.615)),  # Paris
+            (int(self.width*0.235), int(self.height*0.52)),   # London
+            (int(self.width*0.212), int(self.height*0.39)),   # Glasgow
+            (int(self.width*0.298), int(self.height*0.515)),  # Amsterdam
+            (int(self.width*0.4),   int(self.height*0.515)),  # Berlin
+            (int(self.width*0.255), int(self.height*0.615)),  # Paris
         ]
 
         self.overlay.update()
