@@ -1,19 +1,17 @@
-import numpy as np
-class backend:
-    
-    total_cities = 5
+total_cities = 5
 
-    fuelmatrix = np.array(
-        [  # in litres
-            [0, 2981, 2409, 4165, 2334],
-            [2981, 0, 3538, 5013, 4065],
-            [2409, 3538, 0, 3100, 2494],
-            [4165, 5013, 3100, 0, 4015],
-            [2334, 4065, 2494, 4015, 0],
-        ]
-    )
+fuelmatrix = np.array(
+    [  # in litres
+        [0, 2981, 2409, 4165, 2334],
+        [2981, 0, 3538, 5013, 4065],
+        [2409, 3538, 0, 3100, 2494],
+        [4165, 5013, 3100, 0, 4015],
+        [2334, 4065, 2494, 4015, 0],
+    ]
+)
 
-    demandmatrix = np.array(
+demandmatrix = (
+    np.array(
         [  # in thousands
             [0, 3800, 4200, 1900, 3500],
             [3800, 0, 650, 80, 450],
@@ -22,8 +20,11 @@ class backend:
             [3500, 450, 750, 1600, 0],
         ]
     )
+    / 51
+)
 
-    subsistutionCapacityMatrix = np.array(
+subsistutionCapacityMatrix = (
+    np.array(
         [  # in thousands
             [0, 4100, 835, 1, 2900],
             [4100, 0, 1, 1, 1],
@@ -32,98 +33,135 @@ class backend:
             [2900, 1, 950, 85, 0],
         ]
     )
+    / 51
+)
 
-    subsitutionElasticityMatrix = np.array(
-        [  # odds of someone taking a replacememnt route
-            [0, 0.75, 0.4, 0.001, 0.45],
-            [0.75, 0, 0.001, 0.001, 0.001],
-            [0.4, 0.001, 0, 0.60, 0.65],
-            [0.001, 0.001, 0.60, 0, 0.20],
-            [0.45, 0.001, 0.65, 0.20, 0],
-        ]
-    )
+subsitutionElasticityMatrix = np.array(
+    [  # odds of someone taking a replacememnt route
+        [0, 0.75, 0.4, 0.001, 0.45],
+        [0.75, 0, 0.001, 0.001, 0.001],
+        [0.4, 0.001, 0, 0.60, 0.65],
+        [0.001, 0.001, 0.60, 0, 0.20],
+        [0.45, 0.001, 0.65, 0.20, 0],
+    ]
+)
 
-    flightMatrix = np.array(
-        [
-            [0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0],
-        ]
-    )
-
-
-    flightMatrix = np.array(
-        [
-            [0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0],
-        ]
-    )
-
-    planeCapacity = 0.186
+flightMatrix = np.array(
+    [
+        [0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0],
+    ]
+)
 
 
-    def calculateDemandSubstitution(
-        unfilledDemand, substitutionCapacity, substitutionElasticity,self
-    ):
-        # chat gpt made this beause i don't know economics
-        if unfilledDemand <= 0 or substitutionCapacity <= 0:
-            return 0, unfilledDemand
+planeCapacity = 0.186
 
-        fraction = (substitutionCapacity / unfilledDemand) ** substitutionElasticity
+fuel_for_all_flights = 908300000 / 51
 
-        fraction = min(fraction, 1.0)
-
-        switchedPassengers = fraction * unfilledDemand
-        disruptedPassengers = unfilledDemand - switchedPassengers
-
-        return switchedPassengers, disruptedPassengers
+num_planes_to_add = 1
 
 
-    def minimizeDisrupted(totalFuel,self):
+def calculateDemandSubstitution(
+    unfilledDemand, substitutionCapacity, substitutionElasticity
+):
+    # Step 1: Compute potential demand willing to switch
+    potentialSwitch = unfilledDemand * substitutionElasticity
 
-        remainingFuel = totalFuel
+    # Step 2: Apply capacity constraint
+    switchedPassengers = min(potentialSwitch, substitutionCapacity)
 
-        while remainingFuel > 0:
+    # Step 3: Remaining unmet demand
+    disruptedPassengers = unfilledDemand - switchedPassengers
 
-            heuristicMatrix = np.zeros((self.total_cities, self.total_cities))
+    return switchedPassengers, disruptedPassengers
 
-            for source in range(self.total_cities):
 
-                for destination in range(self.total_cities):
-                    if source == destination:
-                        continue
+def minimizeDisrupted(totalFuel):
 
-                    currentlyServiced = self.flightMatrix[source][destination] * self.planeCapacity
+    remainingFuel = totalFuel
 
-                    _, disrupted = self.calculateDemandSubstitution(
-                        self.demandmatrix[source][destination] - currentlyServiced,
-                        self.subsistutionCapacityMatrix[source][destination],
-                        self.subsitutionElasticityMatrix[source][destination],
-                    )
+    while remainingFuel > 0:
 
-                    _, new_disrupted = self.calculateDemandSubstitution(
-                        self.demandmatrix[source][destination]
-                        - currentlyServiced
-                        - self.planeCapacity,
-                        self.subsistutionCapacityMatrix[source][destination],
-                        self.subsitutionElasticityMatrix[source][destination],
-                    )
+        heuristicMatrix = np.zeros((total_cities, total_cities))
 
-                    heuristicMatrix[source, destination] = (
-                        disrupted - new_disrupted
-                    ) / self.fuelmatrix[source][destination]
+        for source in range(total_cities):
 
-            best_flight = np.unravel_index(
-                np.argmax(heuristicMatrix), (self.total_cities, self.total_cities)
+            for destination in range(total_cities):
+                if source == destination:
+                    heuristicMatrix[source, destination] = 0
+
+                    continue
+
+                currentlyServiced = flightMatrix[source, destination] * planeCapacity
+
+                # if all passangers serviced then stop
+                currentlyUnserviced = (
+                    demandmatrix[source][destination] - currentlyServiced
+                )
+
+                if currentlyUnserviced <= 0:
+                    heuristicMatrix[source, destination] = 0
+                    continue
+
+                _, disrupted = calculateDemandSubstitution(
+                    currentlyUnserviced,
+                    subsistutionCapacityMatrix[source][destination],
+                    subsitutionElasticityMatrix[source][destination],
+                )
+
+                _, new_disrupted = calculateDemandSubstitution(
+                    max(
+                        0,
+                        currentlyUnserviced - planeCapacity * num_planes_to_add,
+                    ),
+                    subsistutionCapacityMatrix[source][destination],
+                    subsitutionElasticityMatrix[source][destination],
+                )
+
+                heuristicMatrix[source, destination] = (
+                    (disrupted - new_disrupted) * disrupted
+                ) / fuelmatrix[source][destination]
+
+        best_flight = np.unravel_index(
+            np.argmax(heuristicMatrix), (total_cities, total_cities)
+        )
+
+        flightMatrix[best_flight] = flightMatrix[best_flight] + num_planes_to_add
+        remainingFuel = remainingFuel - fuelmatrix[best_flight] * num_planes_to_add
+    print("flight plan")
+    print(flightMatrix)
+
+    print("passangers taking trains")
+    trainMatrix = np.zeros((total_cities, total_cities))
+    missedMatrix = np.zeros((total_cities, total_cities))
+
+    for source in range(total_cities):
+
+        for destination in range(total_cities):
+            if source == destination:
+
+                continue
+
+            currentlyServiced = flightMatrix[source, destination] * planeCapacity
+
+            # if all passangers serviced then stop
+            currentlyUnserviced = demandmatrix[source][destination] - currentlyServiced
+
+            trainMatrix[source, destination], missedMatrix[source, destination] = (
+                calculateDemandSubstitution(
+                    currentlyUnserviced,
+                    subsistutionCapacityMatrix[source][destination],
+                    subsitutionElasticityMatrix[source][destination],
+                )
             )
-            print(heuristicMatrix)
-            print(best_flight)
 
-            self.flightMatrix[best_flight] = self.flightMatrix[best_flight] + 1
-            remainingFuel = remainingFuel - self.fuelmatrix[best_flight]
+    print((trainMatrix * 1000).tolist())
 
+    print("passangers not able to find transport")
+    print((missedMatrix * 1000).tolist())
+
+
+minimizeDisrupted(fuel_for_all_flights * 0.6)

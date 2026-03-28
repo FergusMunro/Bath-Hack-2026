@@ -1,6 +1,7 @@
-from PyQt6.QtWidgets import QApplication, QPushButton, QWidget, QLabel, QLineEdit
+from PyQt6.QtWidgets import QApplication, QPushButton, QWidget, QLabel, QLineEdit, QMenu, QWidgetAction, QVBoxLayout
 from PyQt6.QtGui import QIcon, QPainterPath, QPixmap, QPainter, QColor
 from PyQt6 import QtCore
+
 import os
 import sys
 from algorithm import backend
@@ -39,28 +40,45 @@ class MainWindow(QWidget):
         self.rect.setStyleSheet("background-color: white;")
 
         # Setup capitals
-        for city in [self.london, self.glasgow, self.amsterdam, self.berlin, self.paris]:
-            city.setStyleSheet((f"background-color: red; border-radius: 0px"))
+        for city_button in [self.london, self.glasgow, self.amsterdam, self.berlin, self.paris]:
+            city_button.setStyleSheet((f"background-color: red; border-radius: 0px"))
+            menu = QMenu(self)
+            
+            # 1. Create a container widget to hold BOTH the input and the button
+            container = QWidget()
+            layout = QVBoxLayout(container)
+            
+            line_edit = QLineEdit()
+            line_edit.setPlaceholderText("Enter fuel...")
+            
+            confirm_btn = QPushButton("Confirm")
+            
+            layout.addWidget(line_edit)
+            layout.addWidget(confirm_btn)
+            
+            # 2. Add the container to the menu
+            action = QWidgetAction(self)
+            action.setDefaultWidget(container)
+            menu.addAction(action)
 
-        # Create a text input field
-        self.input_field1 = QLineEdit(self)
-        self.input_field1.setPlaceholderText("Glasgow Fuel Amount")
+            # 3. Connect the button - now it won't close the whole window
+            confirm_btn.clicked.connect(lambda checked, le=line_edit, b=city_button, m=menu: self.process_fuel(le, b, m))
+            
+            city_button.setMenu(menu)
 
-        self.input_field2 = QLineEdit(self)
-        self.input_field2.setPlaceholderText("London Fuel Amount")
+        # Sidebar stuff
+        self.passengersDisrupted = QLabel(self)
+        self.passengersTransported = QLabel(self)
+        self.totalRevenueLost = QLabel(self)
 
-        self.input_field3 = QLineEdit(self)
-        self.input_field3.setPlaceholderText("Amsterdam Fuel Amount")
+        for boxes in [self.passengersDisrupted,self.passengersTransported,self.totalRevenueLost]:
+            boxes.setStyleSheet("""
+            background-color: lightyellow;   /* background color */
+            color: darkblue;                 /* text color */
+            border: 2px solid gray;          /* border color and thickness */
+            border-radius: 5px;              /* rounded corners */
+            """)
 
-        self.input_field4 = QLineEdit(self)
-        self.input_field4.setPlaceholderText("Paris Fuel Amount")
-
-        self.input_field5 = QLineEdit(self)
-        self.input_field5.setPlaceholderText("Berlin Fuel Amount")
-
-        #limit how small the window can be resized to
-        self.setMinimumSize(800, 600)
-        
         # Trigger the first sizing manually
         self.showMaximized()
 
@@ -88,17 +106,20 @@ class MainWindow(QWidget):
         self.rect.resize(int(width * 0.25), height)
         self.rect.move(int(width * 0.75), 0)
 
-        rect_x = int(width * 0.75)
-        self.input_field1.resize(250, 40)
-        self.input_field1.move(rect_x + 20, 50)
-        self.input_field2.resize(250, 40)
-        self.input_field2.move(rect_x + 20, 100)
-        self.input_field3.resize(250, 40)
-        self.input_field3.move(rect_x + 20, 150)
-        self.input_field4.resize(250, 40)
-        self.input_field4.move(rect_x + 20, 200)
-        self.input_field5.resize(250, 40)
-        self.input_field5.move(rect_x + 20, 250)
+        rect_x = int(width * 0.777)
+        rect_y = int(height*0.05)
+        for boxes in [self.passengersDisrupted,self.passengersTransported,self.totalRevenueLost]:
+            boxes.resize(int(width*0.2),int(height*0.06))
+        self.passengersDisrupted.move(rect_x,rect_y)
+        self.passengersTransported.move(rect_x,rect_y+int(height*0.1))
+        self.totalRevenueLost.move(rect_x,rect_y+int(height*0.2))
+
+    def process_fuel(self, line_edit, button, menu):
+        amount = line_edit.text()
+        print(f"Fuel confirmed: {amount}")
+        
+        # Now close ONLY the menu, not the window
+        menu.close()
 
         self.overlay.resize(self.label.size())
         self.overlay.move(self.label.pos())
