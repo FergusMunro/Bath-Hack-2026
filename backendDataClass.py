@@ -1,4 +1,5 @@
 class BackEndData:
+    
     def __init__(self, cancelledFlights, profit_loss, train_matrix, unable_matrix):
 
         self.cityDict = {
@@ -23,6 +24,9 @@ class BackEndData:
         i = self.cityDict[dist1]
         j = self.cityDict[dist2]
 
+        print(self.cancelledFlights)
+        if(len(self.cancelledFlights)==0):
+            return 0
         if i < j:
             return self.cancelledFlights[j, i]
         else:
