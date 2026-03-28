@@ -223,9 +223,5 @@ def doAnalysis():
     diff = np.array(backup) - np.array(routeMatrix)
     return (diff, oldProfit - newProfit)
 
-    print(f"Change in revenue: {oldProfit- newProfit}")
-    # flights removed
-    # revenue earned
-
 
 doAnalysis()
