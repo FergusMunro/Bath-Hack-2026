@@ -64,9 +64,7 @@ def initializeTerminals():
 
     terminals = np.empty(num_cities, dtype=object)
     for i, city in enumerate(cities):
-        terminals[i] = Terminal(
-            name=city, fuelCost=1.0, fuelAvailability=5000
-        )  # adjust fuelAvailability as needed
+        terminals[i] = Terminal(name=city, fuelCost=1.0, fuelAvailability=5000)
     return terminals
 
 
@@ -79,8 +77,8 @@ def initalizeFlightPaths(terminals):
             start_terminal = terminals[i]
             end_terminal = terminals[j]
             fuel_use = fuelmatrix[i, j]
-            revenue = 1000  # NOTE: temporary
-            demand = demandmatrix[i, j]
+            revenue = revenueMatrix[i, j]
+            demand = routeMatrix[i][j] * flightCapacity
 
             easeOfReplacement = subsitutionElasticityMatrix[i, j]
             path = FlightPath(
@@ -95,22 +93,29 @@ def initalizeFlightPaths(terminals):
     return flight_paths
 
 
-def calculateFuelCost(cityIndex, flight_paths):
+def calculateFuelCost(cityIndex, flight_paths, routeMatrix):
     fuel = 0
     for i in range(cityIndex):
-        fuel += flight_paths[cityIndex, i].getTotalFuelUse()
+        fuel += flight_paths[cityIndex, i].getTotalFuelUse() * routeMatrix[cityIndex, i]
+
     for j in range(cityIndex + 1, num_cities, 1):
-        fuel += flight_paths[j, cityIndex].getTotalFuelUse()
+        fuel += flight_paths[j, cityIndex].getTotalFuelUse() * routeMatrix[j, cityIndex]
     return fuel
 
 
 def getMin(arr, excluded):
+    min_val = None
+    min_idx = -1
+
     excluded = set(excluded)
-    return min(
-        (i for i in range(len(arr)) if i not in excluded),
-        key=lambda i: arr[i],
-        default=-1,
-    )
+    for i, val in enumerate(arr):
+        if i in excluded:
+            continue
+        if min_val is None or val < min_val:
+            min_val = val
+            min_idx = i
+
+    return min_idx
 
 
 def getMinMaxProfit(flight_paths):
@@ -149,8 +154,10 @@ def minimizeDisrupted(routeMatrix, terminals, flight_paths, minProfit, maxProfit
 
     fuelArray = np.zeros(num_cities)
     for i in range(num_cities):
+
         fuelArray[i] = (
-            calculateFuelCost(i, flight_paths) - terminals[i].fuelAvailability
+            calculateFuelCost(i, flight_paths, routeMatrix)
+            - terminals[i].fuelAvailability
         )
     # now our goal is to find the way to find the optimal way to make these zero
 
@@ -175,14 +182,16 @@ def minimizeDisrupted(routeMatrix, terminals, flight_paths, minProfit, maxProfit
 
             excluded = [i]
             while True:
+
                 removeFlight = getMin(heuristics, excluded)
+                if removeFlight == -1:
+                    excluded = [i]
+                    removeFlight = getMin(heuristics, excluded)
+                    break
 
                 if fuelArray[removeFlight] < 0:
                     excluded.append(removeFlight)
                 else:
-                    if removeFlight == -1:
-                        excluded = [i]
-                        removeFlight = getMin(heuristics, excluded)
                     break
 
             if removeFlight < i:
@@ -206,14 +215,6 @@ def doAnalysis():
 
     minProfit, maxProfit = getMinMaxProfit(flight_paths)
 
-    routeMatrix = [
-        [0, 0, 0, 0, 0],
-        [20, 0, 0, 0, 0],
-        [20, 30, 0, 0, 0],
-        [25, 25, 30, 41, 0],
-        [40, 23, 5, 18, 4],
-    ]
-
     backup = copy.deepcopy(routeMatrix)
 
     oldProfit = calculateTotalProfit(routeMatrix, flight_paths)
@@ -235,6 +236,9 @@ def doAnalysis():
             trainMatrix[i, j] = cant_take_plane * subsitutionElasticityMatrix[i, j]
             unableToFindTransportMatrix[i, j] = cant_take_plane - trainMatrix[i, j]
 
+    print(backup)
+    print("----")
+    print(routeMatrix)
     return BackEndData(
         diff, oldProfit - newProfit, trainMatrix, unableToFindTransportMatrix
     )

@@ -1,28 +1,17 @@
 import numpy as np
 
-fuelmatrix = np.array(
-    [  # in litres
-        [0, 2981, 2409, 4165, 2334],
-        [2981, 0, 3538, 5013, 4065],
-        [2409, 3538, 0, 3100, 2494],
-        [4165, 5013, 3100, 0, 4015],
-        [2334, 4065, 2494, 4015, 0],
-    ]
-)
+max_cities = 5
 
-demandmatrix = (
-    np.array(
-        [  # in thousands
-            [0, 3800, 4200, 1900, 3500],
-            [3800, 0, 650, 80, 450],
-            [4200, 650, 0, 1400, 750],
-            [1900, 80, 1400, 0, 1600],
-            [3500, 450, 750, 1600, 0],
-        ]
-    )
-    / 51
-)
+fuelmatrix = np.loadtxt("Fuel_spent.csv", delimiter=",")[:max_cities, :max_cities]
 
+routeMatrix = np.floor(
+    np.loadtxt("Demand_thousands.csv", delimiter=",")[:max_cities, :max_cities] / 52
+)
+# we may stop using this and generate it instead
+
+revenueMatrix = np.loadtxt("ticket_price.csv", delimiter=",")[:max_cities, :max_cities]
+
+"""
 subsistutionCapacityMatrix = (
     np.array(
         [  # in thousands
@@ -35,6 +24,7 @@ subsistutionCapacityMatrix = (
     )
     / 51
 )
+"""
 
 subsitutionElasticityMatrix = np.array(
     [  # odds of someone taking a replacememnt route
@@ -46,15 +36,6 @@ subsitutionElasticityMatrix = np.array(
     ]
 )
 
-flightMatrix = np.array(
-    [
-        [0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0],
-    ]
-)
 
 cities = [
     "London",
@@ -66,5 +47,5 @@ cities = [
     "Reykjavik",
     "Rome",
     "Prague",
-    "Athens"
-    ]
+    "Athens",
+]
