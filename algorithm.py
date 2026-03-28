@@ -1,5 +1,3 @@
-import numpy as np
-
 total_cities = 5
 
 fuelmatrix = np.array(
