@@ -1,6 +1,7 @@
 import numpy as np
 import copy
 
+from backendDataClass import BackEndData
 from data import *
 
 alpha = 1
@@ -221,7 +222,22 @@ def doAnalysis():
     newProfit = calculateTotalProfit(routeMatrix, flight_paths)
 
     diff = np.array(backup) - np.array(routeMatrix)
-    return (diff, oldProfit - newProfit)
+    trainMatrix = np.zeros((num_cities, num_cities))
+    unableToFindTransportMatrix = np.zeros((num_cities, num_cities))
+
+    for i in range(num_cities):
+        for j in range(i):
+
+            cant_take_plane = (
+                flight_paths[i][j].DEMAND - routeMatrix[i][j] * flightCapacity
+            )
+
+            trainMatrix[i, j] = cant_take_plane * subsitutionElasticityMatrix[i, j]
+            unableToFindTransportMatrix[i, j] = cant_take_plane - trainMatrix[i, j]
+
+    return BackEndData(
+        diff, oldProfit - newProfit, trainMatrix, unableToFindTransportMatrix
+    )
 
 
 doAnalysis()
