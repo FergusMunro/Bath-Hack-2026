@@ -1,6 +1,7 @@
-from PyQt6.QtWidgets import QApplication, QPushButton, QWidget, QLabel, QLineEdit, QMenu, QWidgetAction, QVBoxLayout
+from PyQt6.QtWidgets import QApplication, QPushButton, QScrollArea, QWidget, QLabel, QLineEdit, QMenu, QWidgetAction, QVBoxLayout
 from PyQt6.QtGui import QIcon, QPainterPath, QPixmap, QPainter, QColor
 from PyQt6 import QtCore
+from PyQt6.QtCore import Qt
 
 import os
 import sys
@@ -26,6 +27,9 @@ class MainWindow(QWidget):
         self.athens = QPushButton(self)
         self.overlay = Overlay(self)
         self.overlay.stackUnder(self.london)
+        self.scroll = QScrollArea()             # Scroll Area which contains the widgets, set as the centralWidget
+        self.widget = QWidget()                 # Widget that contains the collection of Vertical Box
+        self.vbox = QVBoxLayout() 
         self.initUI()
 
     def getImagePath(self, imageName):
@@ -91,27 +95,37 @@ class MainWindow(QWidget):
             city_button.setMenu(menu)
 
         # Sidebar stuff
-        self.button1 = QLabel(self)
-        self.button1T = QLabel("1",self)
-        self.button2 = QLabel(self)
-        self.button2T = QLabel("2",self)
-        self.button3 = QLabel(self)
-        self.button3T = QLabel("3",self)
+        self.button1T = QLabel("Flights Cancelled:",self)
 
-        for boxes in [self.button1T,self.button2T,self.button3T]:
+        for boxes in [self.button1T]:
             boxes.setStyleSheet("""
             color: black;
             font-size: 22px;
             font-weight: bold;
             """)
 
-        for boxes in [self.button1,self.button2,self.button3]:
+        '''for boxes in [self.button1,self.button2,self.button3]:
             boxes.setStyleSheet("""
             background-color: lightyellow;   /* background color */
             color: darkblue;                 /* text color */
             border: 2px solid gray;          /* border color and thickness */
             border-radius: 5px;              /* rounded corners */
-            """)
+            """)'''
+        
+        for i in range(len(data.cities)):
+            object = QLabel(data.cities[i])
+            self.vbox.addWidget(object)
+        
+       # Sidebar scroll area
+        self.scroll.setParent(self)  # make it a child of MainWindow
+        self.scroll.setGeometry(int(self.width()*0.77), int(self.height()*0.15), int(self.width()*0.22), int(self.height()*0.7))
+        self.scroll.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOn)
+        self.scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.scroll.setWidgetResizable(True)
+
+        self.widget.setLayout(self.vbox)
+        self.scroll.setWidget(self.widget)
+        self.scroll.show()
 
         # Trigger the first sizing manually
         self.showMaximized()
@@ -149,16 +163,14 @@ class MainWindow(QWidget):
 
         rect_x = int(width * 0.777)
         rect_y = int(height*0.08)
-        for boxes in [self.button1,self.button2,self.button3]:
+        '''for boxes in [self.button1,self.button2,self.button3]:
             boxes.resize(int(width*0.2),int(height*0.06))
             self.button1.move(rect_x,rect_y)
             self.button2.move(rect_x,rect_y+int(height*0.12))
-            self.button3.move(rect_x,rect_y+int(height*0.24))
+            self.button3.move(rect_x,rect_y+int(height*0.24))'''
 
-        for boxes in [self.button1T,self.button2T,self.button3T]:
+        for boxes in [self.button1T]:
             self.button1T.move(rect_x,rect_y-int(height*0.05))
-            self.button2T.move(rect_x,rect_y+int(height*0.07))
-            self.button3T.move(rect_x,rect_y+int(height*0.19))
         
         self.overlay.resize(self.label.size())
         self.overlay.move(self.label.pos())
@@ -174,8 +186,8 @@ class MainWindow(QWidget):
             (int(self.width()*0.41), int(self.height()*0.588)),   # prague
             (int(self.width()*0.55), int(self.height()*0.9)),   # athens
         ]
-
-        self.overlay.update()    
+        self.overlay.update()
+        self.scroll.setGeometry(int(width*0.77), int(height*0.08), int(width*0.22), int(height*0.8))
 
     def process_fuel(self, city, line_edit, fuelPrice, menu):
         try:
