@@ -192,21 +192,10 @@ class Overlay(QWidget):
 
         painter = QPainter(self)
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
-        painter.setPen(QColor("blue"))
+        painter.setPen(QColor("red"))
         painter.setBrush(QtCore.Qt.BrushStyle.NoBrush)
 
         # Draw lines between every pair of cities
-        for i in range(5):
-            x, y = self.locations[i]
-            for j in range(i+1, 5):
-                tx, ty = self.locations[j]
-
-                if(backend.subsitutionElasticityMatrix[i][j]!=0.001):
-                    painter.setPen(QColor("blue"))
-                    painter.drawLine(x, y, tx, ty)
-                    painter.setPen(QColor("red"))
-                
-        painter.setPen(QColor("red"))
         for i in range(5):
             x1, y1 = self.locations[i]
             for j in range(i+1, 5):
