@@ -3,9 +3,15 @@ from PyQt6.QtGui import QPixmap
 
 app = QApplication([])
 
-window = QWidget()
-window.resize(600, 400)
+screen = app.primaryScreen()
+geometry = screen.availableGeometry()
+size = geometry.size()
+width = geometry.width()
+height = geometry.height()
 
+window = QWidget()
+window.resize(width, height)
+window.setWindowTitle("Flight Cutter")
 
 label = QLabel(window)
 pixmap = QPixmap("C:/Users/mwhea/Bath hack/Screenshot 2026-03-28 132009.jpg")
@@ -13,7 +19,7 @@ pixmap = QPixmap("C:/Users/mwhea/Bath hack/Screenshot 2026-03-28 132009.jpg")
 # Scale image if you want
 label.setPixmap(pixmap)
 label.setScaledContents(False)  # image stretches with window
-label.resize(950,800)
+label.resize(int(width*0.8),int(height))
 
 # Move the image inside the window
 label.move(0,0)  # x=50, y=50
