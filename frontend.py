@@ -69,13 +69,13 @@ class MainWindow(QWidget):
         self.input_field1.resize(250, 40)
         self.input_field1.move(rect_x + 20, 50)
         self.input_field2.resize(250, 40)
-        self.input_field2.move(rect_x + 20, 100)
+        self.input_field2.move(rect_x + 20, 150)
         self.input_field3.resize(250, 40)
-        self.input_field3.move(rect_x + 20, 150)
+        self.input_field3.move(rect_x + 20, 250)
         self.input_field4.resize(250, 40)
-        self.input_field4.move(rect_x + 20, 200)
+        self.input_field4.move(rect_x + 20, 350)
         self.input_field5.resize(250, 40)
-        self.input_field5.move(rect_x + 20, 250)
+        self.input_field5.move(rect_x + 20, 450)
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
