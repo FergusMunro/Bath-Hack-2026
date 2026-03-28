@@ -46,17 +46,23 @@ class MainWindow(QWidget):
         # Setup capitals
         for city_button in [self.london, self.glasgow, self.amsterdam, self.berlin, self.paris, 
                             self.madrid,self.reykjavik,self.rome,self.prague,self.athens]:
-            city_button.setStyleSheet((f"background-color: red; border-radius: 0px"))
+            city_button.setStyleSheet(""" 
+                                      QPushButton {background-color: red; border: none;}
+                                      QPushButton::menu-indicator {image: none; width: 0px;}
+                                      """)
             menu = QMenu(self)
+
             
             # 1. Create a container widget to hold BOTH the input and the button
             container = QWidget()
             layout = QVBoxLayout(container)
             
+            
             line_edit = QLineEdit()
             line_edit.setPlaceholderText("Enter fuel...")
             
             confirm_btn = QPushButton("Confirm")
+            
             
             layout.addWidget(line_edit)
             layout.addWidget(confirm_btn)
