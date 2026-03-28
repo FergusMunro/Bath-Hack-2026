@@ -95,14 +95,15 @@ class MainWindow(QWidget):
             # 3. Connect the button - now it won't close the whole window
             confirm_btn.clicked.connect(lambda _, c=city, le=line_edit, fp=fuelPrice, m=menu:self.process_fuel(c, le, fp, m)
 )
-
-            
+               
             city_button.setMenu(menu)
 
         # Sidebar stuff
         self.button1T = QLabel("Flights Cancelled:",self)
+        self.button2T = QLabel("Total Revenue Lost:",self)
+        self.button3T = QLabel(self)
 
-        for boxes in [self.button1T]:
+        for boxes in [self.button1T,self.button2T,self.button3T]:
             boxes.setStyleSheet("""
             color: black;
             font-size: 22px;
@@ -117,6 +118,7 @@ class MainWindow(QWidget):
             border-radius: 5px;              /* rounded corners */
             """)'''
         
+        #scroll window stuff
         for i in range(len(data.cities)):
             object = QLabel(data.cities[i])
             self.vbox.addWidget(object)
@@ -130,6 +132,22 @@ class MainWindow(QWidget):
 
         self.widget.setLayout(self.vbox)
         self.scroll.setWidget(self.widget)
+        self.scroll.setStyleSheet("""
+        QScrollBar:vertical {
+            background: #f0f0f0;
+            width: 12px;
+            border-radius: 6px;
+        }
+        QScrollBar::handle:vertical {
+            background: #555;
+            min-height: 30px;
+            border-radius: 6px;
+        }
+        QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+            background: #aaa;
+            height: 12px;
+        }
+        """)
         self.scroll.show()
 
         # Trigger the first sizing manually
@@ -176,6 +194,8 @@ class MainWindow(QWidget):
 
         for boxes in [self.button1T]:
             self.button1T.move(rect_x,rect_y-int(height*0.05))
+            self.button2T.move(rect_x,rect_y+int(height*0.8))
+            self.button3T.move(rect_x,rect_y+int(height*0.85))
         
         self.overlay.resize(self.label.size())
         self.overlay.move(self.label.pos())
