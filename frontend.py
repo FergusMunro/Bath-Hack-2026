@@ -1,4 +1,4 @@
-from PyQt6.QtWidgets import QApplication, QWidget, QLabel
+from PyQt6.QtWidgets import QApplication, QWidget, QLabel, QLineEdit
 from PyQt6.QtGui import QIcon, QPixmap
 import os
 import sys
@@ -28,6 +28,25 @@ class MainWindow(QWidget):
 
         # Setup the white rectangle
         self.rect.setStyleSheet("background-color: white;")
+
+        # Create a text input field
+        self.input_field1 = QLineEdit(self)
+        self.input_field1.setPlaceholderText("Glasgow Fuel Amount")
+
+        self.input_field2 = QLineEdit(self)
+        self.input_field2.setPlaceholderText("London Fuel Amount")
+
+        self.input_field3 = QLineEdit(self)
+        self.input_field3.setPlaceholderText("Amsterdam Fuel Amount")
+
+        self.input_field4 = QLineEdit(self)
+        self.input_field4.setPlaceholderText("Paris Fuel Amount")
+
+        self.input_field5 = QLineEdit(self)
+        self.input_field5.setPlaceholderText("Berlin Fuel Amount")
+
+        #limit how small the window can be resized to
+        self.setMinimumSize(800, 600)
         
         # Trigger the first sizing manually
         self.showMaximized()
@@ -45,6 +64,18 @@ class MainWindow(QWidget):
         # Update White Rectangle (25% width)
         self.rect.resize(int(width * 0.25), height)
         self.rect.move(int(width * 0.75), 0)
+
+        rect_x = int(width * 0.75)
+        self.input_field1.resize(250, 40)
+        self.input_field1.move(rect_x + 20, 50)
+        self.input_field2.resize(250, 40)
+        self.input_field2.move(rect_x + 20, 100)
+        self.input_field3.resize(250, 40)
+        self.input_field3.move(rect_x + 20, 150)
+        self.input_field4.resize(250, 40)
+        self.input_field4.move(rect_x + 20, 200)
+        self.input_field5.resize(250, 40)
+        self.input_field5.move(rect_x + 20, 250)
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
