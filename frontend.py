@@ -1,5 +1,6 @@
-from PyQt6.QtWidgets import QApplication, QWidget, QLabel, QLineEdit
+from PyQt6.QtWidgets import QApplication, QPushButton, QWidget, QLabel, QLineEdit
 from PyQt6.QtGui import QIcon, QPixmap
+from PyQt6.QtCore import Qt
 import os
 import sys
 
@@ -9,6 +10,11 @@ class MainWindow(QWidget):
         # Initialize your labels as class variables so resizeEvent can see them
         self.label = QLabel(self)
         self.rect = QLabel(self)
+        self.london = QPushButton(self)
+        self.glasgow = QPushButton(self)
+        self.amsterdam = QPushButton(self)
+        self.berlin = QPushButton(self)
+        self.paris = QPushButton(self)
         self.initUI()
 
     def getImagePath(self, imageName):
@@ -28,6 +34,10 @@ class MainWindow(QWidget):
 
         # Setup the white rectangle
         self.rect.setStyleSheet("background-color: white;")
+
+        # Setup capitals
+        for city in [self.london, self.glasgow, self.amsterdam, self.berlin, self.paris]:
+            city.setStyleSheet((f" background-color: red;"))
 
         # Create a text input field
         self.input_field1 = QLineEdit(self)
@@ -60,6 +70,16 @@ class MainWindow(QWidget):
         # Update Image Label (75% width)
         self.label.resize(int(width * 0.75), height)
         self.label.move(0, 0)
+
+        #update capitals
+        for city in [self.london, self.glasgow, self.amsterdam, self.berlin, self.paris]:
+            city.resize(int(width*0.01),int(width*0.01))
+        self.london.move(int(width*0.235),int(height*0.52))
+        self.glasgow.move(int(width*0.212),int(height*0.39))
+        self.amsterdam.move(int(width*0.298),int(height*0.515))
+        self.berlin.move(int(width*0.4),int(height*0.515))
+        self.paris.move(int(width*0.255),int(height*0.615))
+        
 
         # Update White Rectangle (25% width)
         self.rect.resize(int(width * 0.25), height)
