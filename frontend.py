@@ -216,7 +216,7 @@ class MainWindow(QWidget):
         self.scroll.setGeometry(int(width*0.77), int(height*0.08), int(width*0.22), int(height*0.8))
 
     def update(self, city, line_edit, fuelPrice, menu):
-       
+        backend.doAnalysis()
         menu.close()
 
 class Overlay(QWidget):
