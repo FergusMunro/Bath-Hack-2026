@@ -95,8 +95,10 @@ class MainWindow(QWidget):
 
         # Sidebar stuff
         self.button1T = QLabel("Flights Cancelled:",self)
+        self.button2T = QLabel("Total Revenue Lost:",self)
+        self.button3T = QLabel(self)
 
-        for boxes in [self.button1T]:
+        for boxes in [self.button1T,self.button2T,self.button3T]:
             boxes.setStyleSheet("""
             color: black;
             font-size: 22px;
@@ -187,6 +189,8 @@ class MainWindow(QWidget):
 
         for boxes in [self.button1T]:
             self.button1T.move(rect_x,rect_y-int(height*0.05))
+            self.button2T.move(rect_x,rect_y+int(height*0.8))
+            self.button3T.move(rect_x,rect_y+int(height*0.85))
         
         self.overlay.resize(self.label.size())
         self.overlay.move(self.label.pos())
