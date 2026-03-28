@@ -1,5 +1,15 @@
 from PyQt6.QtWidgets import QApplication, QWidget, QLabel
 from PyQt6.QtGui import QPixmap
+import os
+
+
+def getImagePath(imageName):
+    path = os.getcwd()
+    path = path + ("/Images/"+imageName)
+    path = path.replace("\\","/")
+    print(path)
+    return path
+
 
 app = QApplication([])
 
@@ -14,10 +24,9 @@ window.resize(width, height)
 window.setWindowTitle("Flight Cutter")
 
 label = QLabel(window)
-pixmap = QPixmap("C:/Users/mwhea/Bath hack/Screenshot 2026-03-28 132009.jpg")
-
+europeMap = QPixmap(getImagePath("Europe.jpg"))
 # Scale image if you want
-label.setPixmap(pixmap)
+label.setPixmap(europeMap)
 label.setScaledContents(False)  # image stretches with window
 label.resize(int(width*0.8),int(height))
 
