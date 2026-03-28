@@ -1,5 +1,5 @@
 class BackEndData:
-    def __init__(self, diff, profit_loss, train_matrix, unable_matrix):
+    def __init__(self, cancelledFlights, profit_loss, train_matrix, unable_matrix):
 
         self.cityDict = {
             "London": 0,
@@ -14,7 +14,7 @@ class BackEndData:
             "Athens": 9,
         }
 
-        self.diff = diff
+        self.cancelledFlights = cancelledFlights + cancelledFlights.T
         self.profit_loss = profit_loss
         self.train_matrix = train_matrix
         self.unable_to_find_transport_matrix = unable_matrix
@@ -24,9 +24,9 @@ class BackEndData:
         j = self.cityDict[dist2]
 
         if i < j:
-            return self.diff[j, i]
+            return self.cancelledFlights[j, i]
         else:
-            return self.diff[i, j]
+            return self.cancelledFlights[i, j]
 
     def getLostProfit(self):
         return self.profit_loss

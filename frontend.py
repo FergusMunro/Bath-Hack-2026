@@ -217,7 +217,6 @@ class MainWindow(QWidget):
 
     def update(self, city, line_edit, fuelPrice, menu):
        
-
         menu.close()
 
 class Overlay(QWidget):
