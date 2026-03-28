@@ -126,6 +126,24 @@ def getMinMaxProfit(flight_paths):
     return minP, maxP
 
 
+def calculateTotalProfit(routeMatrix, flight_paths):
+    totalProfit = 0
+
+    for i in range(num_cities):
+        for j in range(i):
+            numFlights = routeMatrix[i][j]
+
+            if numFlights <= 0:
+                continue
+
+            path = flight_paths[i, j]
+
+            # profit per flight * number of flights
+            totalProfit += numFlights * path.getProfit()
+
+    return totalProfit
+
+
 def minimizeDisrupted(routeMatrix, terminals, flight_paths, minProfit, maxProfit):
 
     fuelArray = np.zeros(num_cities)
@@ -169,11 +187,15 @@ def minimizeDisrupted(routeMatrix, terminals, flight_paths, minProfit, maxProfit
             if removeFlight < i:
                 routeMatrix[i][removeFlight] -= 1
                 fuelArray[i] -= flight_paths[i, removeFlight].fuelUse
-                fuelArray[removeFlight] -= flight_paths[i, removeFlight].fuelUse
+                fuelArray[removeFlight] -= flight_paths[
+                    i, removeFlight
+                ].getTotalFuelUse()
             else:
                 routeMatrix[removeFlight][i] -= 1
                 fuelArray[i] -= flight_paths[removeFlight, i].fuelUse
-                fuelArray[removeFlight] -= flight_paths[removeFlight, i].fuelUse
+                fuelArray[removeFlight] -= flight_paths[
+                    removeFlight, i
+                ].getTotalFuelUse()
     return routeMatrix
 
 
@@ -193,14 +215,17 @@ def doAnalysis():
 
     backup = copy.deepcopy(routeMatrix)
 
+    oldProfit = calculateTotalProfit(routeMatrix, flight_paths)
+
     minimizeDisrupted(routeMatrix, terminals, flight_paths, minProfit, maxProfit)
+    newProfit = calculateTotalProfit(routeMatrix, flight_paths)
 
     diff = np.array(backup) - np.array(routeMatrix)
+    return (diff, oldProfit - newProfit)
 
-    for i in range(num_cities):
-        for j in range(i):
-            if diff[i][j] > 0:
-                print(f"{cities[i]} ↔ {cities[j]}: removed {diff[i][j]} flights")
+    print(f"Change in revenue: {oldProfit- newProfit}")
+    # flights removed
+    # revenue earned
 
 
 doAnalysis()
