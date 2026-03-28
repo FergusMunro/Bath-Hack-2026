@@ -157,6 +157,11 @@ class MainWindow(QWidget):
             (int(self.width()*0.298), int(self.height()*0.515)),  # Amsterdam
             (int(self.width()*0.4),   int(self.height()*0.515)),  # Berlin
             (int(self.width()*0.255), int(self.height()*0.615)),  # Paris
+            (int(self.width()*0.135), int(self.height()*0.8)),   # Madrid
+            (int(self.width()*0.12), int(self.height()*0.09)),   # reykjavik
+            (int(self.width()*0.387), int(self.height()*0.81)),   # rome
+            (int(self.width()*0.41), int(self.height()*0.588)),   # prague
+            (int(self.width()*0.55), int(self.height()*0.9)),   # athens
         ]
 
         self.overlay.update()    

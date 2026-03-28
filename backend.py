@@ -176,7 +176,7 @@ def minimizeDisrupted(routeMatrix):
     for i in range(num_cities):
         for j in range(i):
             if diff[i][j] > 0:
-                print(f"{cities[i]} ↔ {cities[j]}: removed {diff[i][j]} flights")
+                print(f"{cities[i]} <> {cities[j]}: removed {diff[i][j]} flights")
 
 
 minimizeDisrupted(routeMatrix)
