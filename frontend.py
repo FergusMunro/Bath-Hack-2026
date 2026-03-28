@@ -1,5 +1,5 @@
 from PyQt6.QtWidgets import QApplication, QWidget, QLabel
-from PyQt6.QtGui import QPixmap
+from PyQt6.QtGui import QIcon, QPixmap
 import os
 import sys
 
@@ -19,6 +19,7 @@ class MainWindow(QWidget):
 
     def initUI(self):
         self.setWindowTitle("Flight Cutter")
+        self.setWindowIcon(QIcon(self.getImagePath("Plane.ico")))
         
         # Setup the image label
         pixmap = QPixmap(self.getImagePath("Europe.jpg"))
