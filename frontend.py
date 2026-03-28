@@ -1,4 +1,4 @@
-from PyQt6.QtWidgets import QApplication, QPushButton, QWidget, QLabel, QLineEdit
+from PyQt6.QtWidgets import QApplication, QPushButton, QWidget, QLabel, QLineEdit, QMenu, QWidgetAction, QVBoxLayout
 from PyQt6.QtGui import QIcon, QPixmap
 from PyQt6.QtCore import Qt
 import os
@@ -36,28 +36,30 @@ class MainWindow(QWidget):
         self.rect.setStyleSheet("background-color: white;")
 
         # Setup capitals
-        for city in [self.london, self.glasgow, self.amsterdam, self.berlin, self.paris]:
-            city.setStyleSheet((f" background-color: red;"))
+        for city_button in [self.london, self.glasgow, self.amsterdam, self.berlin, self.paris]:
+            menu = QMenu(self)
+            
+            # 1. Create a container widget to hold BOTH the input and the button
+            container = QWidget()
+            layout = QVBoxLayout(container)
+            
+            line_edit = QLineEdit()
+            line_edit.setPlaceholderText("Enter fuel...")
+            
+            confirm_btn = QPushButton("Confirm")
+            
+            layout.addWidget(line_edit)
+            layout.addWidget(confirm_btn)
+            
+            # 2. Add the container to the menu
+            action = QWidgetAction(self)
+            action.setDefaultWidget(container)
+            menu.addAction(action)
 
-        # Create a text input field
-        self.input_field1 = QLineEdit(self)
-        self.input_field1.setPlaceholderText("Glasgow Fuel Amount")
-
-        self.input_field2 = QLineEdit(self)
-        self.input_field2.setPlaceholderText("London Fuel Amount")
-
-        self.input_field3 = QLineEdit(self)
-        self.input_field3.setPlaceholderText("Amsterdam Fuel Amount")
-
-        self.input_field4 = QLineEdit(self)
-        self.input_field4.setPlaceholderText("Paris Fuel Amount")
-
-        self.input_field5 = QLineEdit(self)
-        self.input_field5.setPlaceholderText("Berlin Fuel Amount")
-
-        #limit how small the window can be resized to
-        self.setMinimumSize(800, 600)
-        
+            # 3. Connect the button - now it won't close the whole window
+            confirm_btn.clicked.connect(lambda checked, le=line_edit, b=city_button, m=menu: self.process_fuel(le, b, m))
+            
+            city_button.setMenu(menu)
         # Trigger the first sizing manually
         self.showMaximized()
 
@@ -84,18 +86,6 @@ class MainWindow(QWidget):
         # Update White Rectangle (25% width)
         self.rect.resize(int(width * 0.25), height)
         self.rect.move(int(width * 0.75), 0)
-
-        rect_x = int(width * 0.75)
-        self.input_field1.resize(250, 40)
-        self.input_field1.move(rect_x + 20, 50)
-        self.input_field2.resize(250, 40)
-        self.input_field2.move(rect_x + 20, 150)
-        self.input_field3.resize(250, 40)
-        self.input_field3.move(rect_x + 20, 250)
-        self.input_field4.resize(250, 40)
-        self.input_field4.move(rect_x + 20, 350)
-        self.input_field5.resize(250, 40)
-        self.input_field5.move(rect_x + 20, 450)
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
