@@ -67,7 +67,7 @@ class MainWindow(QWidget):
 
             fuelPrice = QLineEdit()
             fuelPrice.setPlaceholderText("Enter the fuel price in £")
-
+            
             city = QLabel(data.cities[i])
             i=i+1
             
@@ -84,7 +84,9 @@ class MainWindow(QWidget):
             menu.addAction(action)
 
             # 3. Connect the button - now it won't close the whole window
-            confirm_btn.clicked.connect(lambda checked, le=line_edit, b=city_button, m=menu: self.process_fuel(le, b, m))
+            confirm_btn.clicked.connect(lambda _, c=city, le=line_edit, fp=fuelPrice, m=menu:self.process_fuel(c, le, fp, m)
+)
+
             
             city_button.setMenu(menu)
 
@@ -175,11 +177,15 @@ class MainWindow(QWidget):
 
         self.overlay.update()    
 
-    def process_fuel(self, line_edit, button, menu):
-        amount = line_edit.text()
-        print(f"Fuel confirmed: {amount}")
-        
-        # Now close ONLY the menu, not the window
+    def process_fuel(self, city, line_edit, fuelPrice, menu):
+        try:
+            volume = int(line_edit.text())
+            cost = int(fuelPrice.text())
+        except ValueError:
+            print("Invalid input")
+            return
+
+        print(f"Fuel confirmed: {volume} {cost} {city.text()}")
         menu.close()
 
 class Overlay(QWidget):
