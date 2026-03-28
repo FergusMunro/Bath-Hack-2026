@@ -1,3 +1,4 @@
+
 from PyQt6.QtWidgets import QApplication, QPushButton, QScrollArea, QWidget, QLabel, QLineEdit, QMenu, QWidgetAction, QVBoxLayout
 from PyQt6.QtGui import QIcon, QPainterPath, QPixmap, QPainter, QColor
 from PyQt6 import QtCore
@@ -10,6 +11,9 @@ import backend
 import data
 
 class MainWindow(QWidget):
+
+    buttonList  = list()
+
     def __init__(self):
         super().__init__()
         # Initialize your labels as class variables so resizeEvent can see them
@@ -77,6 +81,8 @@ class MainWindow(QWidget):
             
             confirm_btn = QPushButton("Confirm")
             
+            self.buttonList.append(Buttons(confirm_btn,line_edit,fuelPrice,menu,city.text()))
+
             layout.addWidget(city)
             layout.addWidget(line_edit)
             layout.addWidget(fuelPrice)
@@ -88,7 +94,7 @@ class MainWindow(QWidget):
             menu.addAction(action)
 
             # 3. Connect the button - now it won't close the whole window
-            confirm_btn.clicked.connect(lambda _, c=city, le=line_edit, fp=fuelPrice, m=menu:self.process_fuel(c, le, fp, m)
+            confirm_btn.clicked.connect(lambda _, c=city, le=line_edit, fp=fuelPrice, m=menu:self.update(c, le, fp, m)
 )
                
             city_button.setMenu(menu)
@@ -209,15 +215,9 @@ class MainWindow(QWidget):
         self.overlay.update()
         self.scroll.setGeometry(int(width*0.77), int(height*0.08), int(width*0.22), int(height*0.8))
 
-    def process_fuel(self, city, line_edit, fuelPrice, menu):
-        try:
-            volume = int(line_edit.text())
-            cost = int(fuelPrice.text())
-        except ValueError:
-            print("Invalid input")
-            return
+    def update(self, city, line_edit, fuelPrice, menu):
+       
 
-        print(f"Fuel confirmed: {volume} {cost} {city.text()}")
         menu.close()
 
 class Overlay(QWidget):
@@ -262,7 +262,16 @@ class Overlay(QWidget):
 
                 painter.drawPath(path)
 
-               
+
+class Buttons:
+    def __init__(self, button, fuelVolume, fuelCost, menu, city):
+        self.button = button
+        self.fuelVolume = fuelVolume
+        self.fuelCost = fuelCost
+        self.menu = menu
+        self.city = city
+
+    
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
