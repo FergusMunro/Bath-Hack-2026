@@ -58,11 +58,15 @@ class MainWindow(QWidget):
             
             # 1. Create a container widget to hold BOTH the input and the button
             container = QWidget()
+            container.setFixedSize(180, 150)
             layout = QVBoxLayout(container)
             
             
             line_edit = QLineEdit()
-            line_edit.setPlaceholderText("Enter fuel...")
+            line_edit.setPlaceholderText("Enter fuel availiable in kL")
+
+            fuelPrice = QLineEdit()
+            fuelPrice.setPlaceholderText("Enter the fuel price in £")
 
             city = QLabel(data.cities[i])
             i=i+1
@@ -71,6 +75,7 @@ class MainWindow(QWidget):
             
             layout.addWidget(city)
             layout.addWidget(line_edit)
+            layout.addWidget(fuelPrice)
             layout.addWidget(confirm_btn)
             
             # 2. Add the container to the menu
