@@ -55,3 +55,16 @@ flightMatrix = np.array(
         [0, 0, 0, 0, 0],
     ]
 )
+
+cities = [
+    "London",
+    "Glasgow",
+    "Amsterdam",
+    "Berlin",
+    "Paris",
+    "Madrid",
+    "Reykjavik",
+    "Rome",
+    "Prague",
+    "Athens"
+    ]
