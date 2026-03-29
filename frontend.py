@@ -496,7 +496,8 @@ class MainWindow(QWidget):
                 slider_width,
                 slider_height,
             )
-            label.setText(label.text() + ": " + str(slider.value()))
+            slider.raise_()
+            #label.setText(label.text() + ": " + str(slider.value()))
 
         rect_x = int(width * 0.777)
         rect_y = int(height * 0.08)
