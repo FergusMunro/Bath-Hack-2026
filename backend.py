@@ -246,8 +246,6 @@ def doAnalysis():
     terminals = initializeTerminals(fuel_availability, fuel_cost)
     flight_paths = initalizeFlightPaths(terminals)
 
-    maxConsumption = calculateFuelConsumptionAtTerminal(flight_paths, routeMatrix)
-
     minProfit, maxProfit = getMinMaxProfit(flight_paths)
 
     backup = copy.deepcopy(routeMatrix)
@@ -273,6 +271,7 @@ def doAnalysis():
             trainMatrix[i, j] = cant_take_plane * subsitutionElasticityMatrix[i, j]
             unableToFindTransportMatrix[i, j] = cant_take_plane - trainMatrix[i, j]
 
+    print(diff)
     return BackEndData(
         diff, oldProfit - newProfit, trainMatrix, unableToFindTransportMatrix
     )
