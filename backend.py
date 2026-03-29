@@ -281,14 +281,14 @@ doAnalysis()
 
 def updateProfitImportance(sliderVal):
     global alpha
-    alpha = sliderVal
+    alpha = sliderVal / 100
 
 
 def updateReplacementImportance(sliderVal):
     global beta
-    beta = sliderVal
+    beta = sliderVal / 100
 
 
 def updateDemandImportance(sliderVal):
     global gamma
-    gamma = sliderVal
+    gamma = sliderVal / 100
