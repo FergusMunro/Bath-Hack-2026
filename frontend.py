@@ -561,8 +561,8 @@ class MainWindow(QWidget):
         self.button3T.setText(str(int(flightData.getLostProfit())))
         marquee_text = (
             " | ".join(flight_texts) if flight_texts else "No cancelled flights yet."
-        #marquee_text = marquee_text +" " + " | ".join(remainingFlights) if remainingFlights else "No remaining flights."
         )
+        marquee_text = marquee_text +" " + " | ".join(remainingFlights) if remainingFlights else "No remaining flights."
         self.marquee.updateText(marquee_text)
         # Add new labels
         for i in range(len(flightData.cancelledFlights)):
