@@ -155,6 +155,7 @@ class MainWindow(QWidget):
               if value > 0:
                object = QLabel(f"{data.cities[i]} <> {data.cities[j]}: {int(value)}")
                self.vbox.addWidget(object)
+        self.button3T.setText(str(flightData.getLostProfit()))
         self.scroll.show()
 
         # Trigger the first sizing manually
@@ -233,6 +234,7 @@ class MainWindow(QWidget):
               if value > 0:
                object = QLabel(f"{data.cities[i]} <> {data.cities[j]}: {int(value)}")
                self.vbox.addWidget(object)
+        self.button3T.setText(str(flightData.getLostProfit()))
         menu.close()
 
     
