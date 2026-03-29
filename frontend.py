@@ -153,7 +153,7 @@ class MainWindow(QWidget):
              if i<j:
               value = flightData.cancelledFlights[j][i]
               if value > 0:
-               object = QLabel(f"{data.cities[i]} <> {data.cities[j]}: {value}")
+               object = QLabel(f"{data.cities[i]} <> {data.cities[j]}: {int(value)}")
                self.vbox.addWidget(object)
         self.scroll.show()
 
@@ -231,7 +231,7 @@ class MainWindow(QWidget):
              if i<j:
               value = flightData.cancelledFlights[j][i]
               if value > 0:
-               object = QLabel(f"{data.cities[i]} <> {data.cities[j]}: {value}")
+               object = QLabel(f"{data.cities[i]} <> {data.cities[j]}: {int(value)}")
                self.vbox.addWidget(object)
         menu.close()
 

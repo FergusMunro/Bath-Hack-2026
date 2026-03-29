@@ -64,7 +64,7 @@ def initializeTerminals():
 
     terminals = np.empty(num_cities, dtype=object)
     for i, city in enumerate(cities):
-        terminals[i] = Terminal(name=city, fuelCost=1.0, fuelAvailability=500000)
+        terminals[i] = Terminal(name=city, fuelCost=1.0, fuelAvailability=100000)
     return terminals
 
 
