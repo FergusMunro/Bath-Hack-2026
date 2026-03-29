@@ -79,10 +79,10 @@ class MainWindow(QWidget):
             
             
             line_edit = QLineEdit()
-            line_edit.setPlaceholderText("Enter fuel availiable in kL")
+            line_edit.setPlaceholderText(str(int(data.fuel_availability[i])))
 
             fuelPrice = QLineEdit()
-            fuelPrice.setPlaceholderText("Enter the fuel price in £")
+            fuelPrice.setPlaceholderText(str(int(data.fuel_cost[i])))
             
             city = QLabel(data.cities[i])
             i=i+1
