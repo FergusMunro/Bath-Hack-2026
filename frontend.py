@@ -19,7 +19,7 @@ from PyQt6.QtGui import QIcon, QPainterPath, QPixmap, QPainter, QColor, QPen
 from PyQt6 import QtCore
 from PyQt6.QtCore import Qt, QTimer, QPointF
 
-import os
+from os import getcwd
 import sys
 import random
 import math
@@ -79,7 +79,7 @@ class PlaneSprite(QWidget):
         super().__init__(parent)
 
         def getImagePath(self, imageName):
-            path = os.getcwd()
+            path = getcwd()
             path = path + ("/Images/" + imageName)
             path = path.replace("\\", "/")
             return path
@@ -299,7 +299,7 @@ class MainWindow(QWidget):
             self.dino_game = startGame()
 
     def getImagePath(self, imageName):
-        path = os.getcwd()
+        path = getcwd()
         path = path + ("/Images/" + imageName)
         path = path.replace("\\", "/")
         return path
