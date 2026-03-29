@@ -86,7 +86,7 @@ class PlaneSprite(QWidget):
         
         original = QPixmap("Images\Plane.png")
         self.pixmap = original.scaled(
-            30, 30,  
+            80, 80,  
             Qt.AspectRatioMode.KeepAspectRatio,
             Qt.TransformationMode.SmoothTransformation
         )
@@ -142,7 +142,7 @@ class PlaneSprite(QWidget):
         dt = 0.01
         a = self._bezier_point(t - dt)
         b = self._bezier_point(t + dt)
-        self._angle = math.degrees(math.atan2(b.y() - a.y(), b.x() - a.x()))
+        self._angle = math.degrees(math.atan2(b.y() - a.y(), b.x() - a.x()))+95
 
     def paintEvent(self, event):
         if not self.visible_plane:
@@ -496,7 +496,8 @@ class MainWindow(QWidget):
                 slider_width,
                 slider_height,
             )
-            label.setText(label.text() + ": " + str(slider.value()))
+            slider.raise_()
+            #label.setText(label.text() + ": " + str(slider.value()))
 
         rect_x = int(width * 0.777)
         rect_y = int(height * 0.08)
@@ -598,17 +599,11 @@ class MainWindow(QWidget):
         marquee_text = (
             " | ".join(flight_texts) if flight_texts else "No cancelled flights yet."
         )
-        marquee_text = (
-            marquee_text + " " + " | ".join(remainingFlights)
-            if remainingFlights
-            else "No remaining flights."
-        )
         self.marquee.updateText(marquee_text)
         # Refresh the rate source so plane frequency reflects new fuel data
         self.flightData = flightData
         self.scheduler.updateLambdaMatrix(self.flightData.getFlightMatrix())
         self.overlay.BackEndData = self.flightData
-
 
 def clear_layout(layout):
     while layout.count():
