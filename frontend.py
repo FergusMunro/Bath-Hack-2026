@@ -386,6 +386,12 @@ class MainWindow(QWidget):
         self.button2T = QLabel("Total Revenue Lost:", self)
         self.button3T = QLabel(self)
         self.button4T = QLabel(self)
+        self.button5T = QPushButton("Export", self)
+        self.button5T.pressed.connect(self.on_pressed)
+        self.button5T.setStyleSheet("""
+                                    color: black;
+                                    background-color: grey;
+                                """)
         self.button3T.setFixedWidth(int(self.width() * 0.5))
 
         for boxes in [self.button1T, self.button2T, self.button3T, self.button4T]:
@@ -499,9 +505,12 @@ class MainWindow(QWidget):
         self.button3T.move(rect_x, rect_y + int(height * 0.65))
         self.button4T.move(int(width * 0.45), int(height*0.95))
         self.button4T.resize(int(width * 0.5), int(height * 0.05))
+        self.button5T.move(int(width * 0.01), int(height * 0.04))
+        self.button5T.resize(int(width * 0.08), int(height * 0.04))
         self.scroll.setGeometry(
             int(width * 0.77), int(height * 0.08), int(width * 0.22), int(height * 0.6)
         )
+
 
         # Overlay
         self.overlay.resize(self.label.size())
@@ -529,6 +538,10 @@ class MainWindow(QWidget):
         self.refreshButton.setFixedSize(btn_w, btn_h)
         self.refreshButton.move(int(width * 0.01), int(height * 0.93))
         self.refreshButton.raise_()
+    
+    def on_pressed(self):
+            flightData = backend.doAnalysis()
+            flightData.exportCSV()
 
     def update_all(self, city, line_edit, fuelPrice, menu):
         try:
@@ -557,6 +570,7 @@ class MainWindow(QWidget):
                     if value > 0:
                         obj = QLabel(
                             f"<b>{data.cities[i]} &lt;&gt; {data.cities[j]}: {int(value)} flights</b> <br>"
+                            f"Flights Remaining: {int(flightData.getNumFlights(i, j))} <br>"
                             f"{int(flightData.getDivertedToTrain(data.cities[i], data.cities[j]))} people were diverted to train<br>"
                             f"{int(flightData.getUnableToFindTransport(data.cities[i], data.cities[j]))} people were unable to find transport<br>"
                         )
@@ -602,7 +616,6 @@ def clear_layout(layout):
         widget = item.widget()
         if widget:
             widget.deleteLater()
-
 
 # ------------------- Overlay -------------------
 class Overlay(QWidget):
