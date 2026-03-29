@@ -649,6 +649,7 @@ class Overlay(QWidget):
 
                 painter.setPen(self.pen)
 
+                print(f"Remaining = {self.availableFlights[i][j] - cancelled} City = {firstCity} Destination = {secondCity}")
                 x2, y2 = self.locations[j]
                 mx = (x1 + x2) / 2
                 my = (y1 + y2) / 2
