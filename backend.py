@@ -273,6 +273,7 @@ def doAnalysis():
             trainMatrix[i, j] = cant_take_plane * subsitutionElasticityMatrix[i, j]
             unableToFindTransportMatrix[i, j] = cant_take_plane - trainMatrix[i, j]
 
+    print(planeShedule)
     return BackEndData(
         diff, backup, oldProfit - newProfit, trainMatrix, unableToFindTransportMatrix
     )
@@ -299,7 +300,4 @@ def updateDemandImportance(sliderVal):
 def networkFuelMultiplier(sliderVal):
     global fuel_multiplier
     fuel_multiplier = sliderVal / 100
-
-
-doAnalysis()
 
