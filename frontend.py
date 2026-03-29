@@ -412,7 +412,7 @@ class MainWindow(QWidget):
                 background-color: #1e40af;
             }
         """)
-        self.refreshButton.clicked.connect(self.updateflights)
+        self.refreshButton.clicked.connect(self.update_flights)
         self.refreshButton.raise_()
 
         # Trigger the first sizing manually
@@ -502,11 +502,12 @@ class MainWindow(QWidget):
         self.marquee.move(0, 0)
         self.marquee.raise_()
 
-        btn_w, btn_h = 180, 45
+        btn_w, btn_h = int(width * 0.15), int(height * 0.06)
         self.refreshButton.setFixedSize(btn_w, btn_h)
-        self.refreshButton.move(width - btn_w - 16, height - btn_h - 16)
+        self.refreshButton.move(int(width*0.01), int(height*0.93))
         self.refreshButton.raise_()
 
+<<<<<<< HEAD
     def updateflights(self):
         flightData = backend.doAnalysis()
         clear_layout(self.vbox)
@@ -523,6 +524,8 @@ class MainWindow(QWidget):
         self.flightData = flightData
         self.scheduler._lambda_fn = self.flightData.getNumFlights
 
+=======
+>>>>>>> 2a1bc65a1519fbc3bacbcbe1ff7dc03c1a438da4
     def update_all(self, city, line_edit, fuelPrice, menu):
         try:
             num = data.cities.index(city)
@@ -562,6 +565,7 @@ class MainWindow(QWidget):
             " | ".join(flight_texts) if flight_texts else "No cancelled flights yet."
         )
         self.marquee.updateText(marquee_text)
+<<<<<<< HEAD
         # Add new labels
         for i in range(len(flightData.cancelledFlights)):
             for j in range(len(flightData.cancelledFlights[i])):
@@ -574,6 +578,9 @@ class MainWindow(QWidget):
                         self.vbox.addWidget(obj)
 
         # Update lost profit
+=======
+            # Update lost profit
+>>>>>>> 2a1bc65a1519fbc3bacbcbe1ff7dc03c1a438da4
         self.button3T.setText(str(int(flightData.getLostProfit())))
 
         # Refresh the rate source so plane frequency reflects new fuel data
