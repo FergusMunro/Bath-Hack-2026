@@ -581,10 +581,6 @@ class MainWindow(QWidget):
                             f"{data.cities[i]} <> {data.cities[j]}: {int(value)} cancelled"
                         )
 
-                        flight_texts.append(
-                            f"{data.cities[i]} <> {data.cities[j]}: {int(value)} cancelled"
-                        )
-
         for i in range(len(flightData.totalFlights)):
             for j in range(i+1,len(flightData.totalFlights[i])):
                 if i < j:
