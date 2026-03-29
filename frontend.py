@@ -7,6 +7,7 @@ from PyQt6.QtCore import Qt
 import os
 import sys
 
+from dino import startGame
 import backend
 import backendDataClass
 import data
@@ -37,6 +38,10 @@ class MainWindow(QWidget):
         self.widget = QWidget()                 # Widget that contains the collection of Vertical Box
         self.vbox = QVBoxLayout() 
         self.initUI()
+
+    def keyPressEvent(self, event):
+        if event.key() == Qt.Key.Key_D and event.modifiers() & Qt.KeyboardModifier.ControlModifier:
+            self.dino_game = startGame()
 
     def getImagePath(self, imageName):
         path = os.getcwd()
