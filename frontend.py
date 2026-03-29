@@ -357,7 +357,7 @@ class MainWindow(QWidget):
                 background-color: #1e40af;
             }
         """)
-        self.refreshButton.clicked.connect(self.updateflights)
+        self.refreshButton.clicked.connect(self.update_flights)
         self.refreshButton.raise_()
 
         # Trigger the first sizing manually
@@ -429,20 +429,6 @@ class MainWindow(QWidget):
         self.refreshButton.setFixedSize(btn_w, btn_h)
         self.refreshButton.move(int(width*0.01), int(height*0.93))
         self.refreshButton.raise_()
-
-    def updateflights(self):
-        flightData = backend.doAnalysis()
-        clear_layout(self.vbox)
-        for i in range(len(flightData.cancelledFlights)):
-            for j in range(len(flightData.cancelledFlights[i])):
-                if i < j:
-                    value = flightData.cancelledFlights[j][i]
-                    if value > 0:
-                        obj = QLabel(f"{data.cities[i]} <> {data.cities[j]}: {int(value)}")
-                        self.vbox.addWidget(obj)
-        self.button3T.setText(str(int(flightData.getLostProfit())))
-        self.flightData = flightData
-        self.scheduler._lambda_fn = self.flightData.getNumFlights
 
     def update_all(self, city, line_edit, fuelPrice, menu):
         try:
