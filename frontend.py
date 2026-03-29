@@ -307,13 +307,13 @@ class MainWindow(QWidget):
         self.rect.setStyleSheet("background-color: white;")
 
         # Sliders setup
-        slider_names = ["Profit", "Minimise disruption", "Prioritise essential"]
+        slider_names = ["Profit", "Minimise disruption", "Prioritise essential", "Overall Fuel Shortage Multiplier"]
         for name in slider_names:
             slider_label = QLabel(name, self)
             slider_label.setStyleSheet("color: black; font-weight: bold;")
             slider = QSlider(Qt.Orientation.Horizontal, self)
             slider.setRange(0, 100)
-            slider.setValue(50)
+            slider.setValue(100)
             slider.valueChanged.connect(
                 lambda val, l=slider_label, name=name: l.setText(f"{name}: {val}")
             )
@@ -344,9 +344,9 @@ class MainWindow(QWidget):
             layout = QVBoxLayout(container)
 
             line_edit = QLineEdit()
-            line_edit.setPlaceholderText(str(int(data.fuel_availability[i])))
+            line_edit.setText(str(int(data.fuel_availability[i])))
             fuelPrice = QLineEdit()
-            fuelPrice.setPlaceholderText(str(int(data.fuel_cost[i])))
+            fuelPrice.setText(str(int(data.fuel_cost[i])))
             city_label = QLabel(data.cities[i])
             i += 1
             confirm_btn = QPushButton("Confirm")
@@ -467,6 +467,7 @@ class MainWindow(QWidget):
         self.rect.move(int(width * 0.75), 0)
 
         # Sliders bottom right
+
         slider_width = int(width * 0.2)
         slider_height = int(height * 0.03)
         padding = 10
@@ -531,6 +532,7 @@ class MainWindow(QWidget):
         backend.updateProfitImportance(self.sliders[0].value())
         backend.updateReplacementImportance(self.sliders[1].value())
         backend.updateDemandImportance(self.sliders[2].value())
+        backend.networkFuelMultiplier(self.sliders[3].value())
         flightData = backend.doAnalysis()
         clear_layout(self.vbox)
 
@@ -568,7 +570,6 @@ class MainWindow(QWidget):
         self.button4T.setText(
             "Total People Affected: " + str(int(flightData.getTotalAffected()))
         )
-        print(flightData.train_matrix)
         marquee_text = (
             " | ".join(flight_texts) if flight_texts else "No cancelled flights yet."
         )
