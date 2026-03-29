@@ -600,7 +600,7 @@ class Overlay(QWidget):
             return
         painter = QPainter(self)
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
-        painter.setPen(QColor("red"))
+        painter.setPen(QColor("green"))
         painter.setBrush(QtCore.Qt.BrushStyle.NoBrush)
 
         for i in range(len(self.locations)):
@@ -612,7 +612,7 @@ class Overlay(QWidget):
                 cancelled = self.BackEndData.getCancelledFlights(firstCity, secondCity)
 
                 if self.availableFlights[i][j] == 0:
-                    opacity = 0.5
+                    opacity = 0.1
                 else:
                     opacity = (
                         self.availableFlights[i][j] - cancelled
@@ -620,12 +620,17 @@ class Overlay(QWidget):
 
                 if opacity < 0:
                     opacity = 0
+
                 painter.setOpacity(opacity)
-                if opacity < 1:
-                    print(
-                        f"City = {firstCity} Destination = {secondCity} Opacity =  {opacity} Cancelled = {cancelled}"
-                    )
-                    print(self.BackEndData.cancelledFlights)
+                if opacity < 0.75 and opacity > 0.5:
+                    painter.setPen(QColor("yellow"))
+
+                elif opacity <= 0.5 and opacity > 0.25:
+                    painter.setPen(QColor("red"))
+
+                elif opacity <= 0.25:
+                    painter.setPen(QColor("black"))
+
                 x2, y2 = self.locations[j]
                 mx = (x1 + x2) / 2
                 my = (y1 + y2) / 2
