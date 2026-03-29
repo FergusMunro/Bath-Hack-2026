@@ -61,3 +61,6 @@ class BackEndData:
             return self.unable_to_find_transport_matrix[j, i]
         else:
             return self.unable_to_find_transport_matrix[i, j]
+
+    def getTotalAffected(self):
+        return np.sum(self.train_matrix + self.unable_to_find_transport_matrix) / 2

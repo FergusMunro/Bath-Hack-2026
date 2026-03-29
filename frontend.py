@@ -164,13 +164,17 @@ class PlaneScheduler:
 
     def __init__(self, parent_window, lambda_matrix, locations_fn):
         self._parent = parent_window  # Store the main window instead of a single sprite
-        self._lambda_matrix = lambda_matrix * 400000
+        self._lambda_matrix = lambda_matrix / 100
+
         self._locations_fn = locations_fn
         self._timer = QTimer()
         self._timer.setSingleShot(True)
         self._timer.timeout.connect(self._dispatch)
 
         self.fps = 15
+
+    def updateLambdaMatrix(self, flightMatrix):
+        self._lambda_matrix = flightMatrix / 100
 
     def start(self):
         self._timer.setSingleShot(False)  # repeating timer
@@ -187,10 +191,7 @@ class PlaneScheduler:
                     if i == j:
                         continue
 
-                    # print(self._lambda_matrix)
-                    prob = 0
-                    # print(prob)
-                    # print(self._lambda_matrix[i, j])
+                    prob = 1 - np.exp(-(self._lambda_matrix[i, j]) * (self.fps / 1000))
                     u = random.random()
                     if u < prob:
                         new_plane = PlaneSprite(self._parent)
@@ -263,6 +264,11 @@ class MainWindow(QWidget):
         self.athens.raise_()
 
         self.flightData = backend.doAnalysis()
+
+        # pass values to overlay
+        self.overlay.buttonList = self.buttonList
+        self.overlay.availableFlights = self.flightData.totalFlights
+
         self.scheduler = PlaneScheduler(
             parent_window=self,  # Pass the MainWindow as the parent
             lambda_matrix=self.flightData.getFlightMatrix(),
@@ -530,6 +536,7 @@ class MainWindow(QWidget):
 
         # Sidebar cancelled flights
         flight_texts = []
+        remainingFlights = []
         for i in range(len(flightData.cancelledFlights)):
             for j in range(len(flightData.cancelledFlights[i])):
                 if i < j:
@@ -546,10 +553,24 @@ class MainWindow(QWidget):
                             f"{data.cities[i]} <> {data.cities[j]}: {int(value)} cancelled"
                         )
 
+                        flight_texts.append(
+                            f"{data.cities[i]} <> {data.cities[j]}: {int(value)} cancelled"
+                        )
+
+        for i in range(len(flightData.totalFlights)):
+            for j in range(len(flightData.totalFlights[i])):
+                if i < j:
+                    remaining = flightData.getNumFlights(i, j)
+                    remainingFlights.append(
+                        f"{data.cities[i]} <> {data.cities[j]}: {int(remaining)} remaining"
+                    )
         self.button3T.setText(str(int(flightData.getLostProfit())))
         self.button4T.setText("Total People Affected: " + str(int(flightData.getTotalPeopleAffected())))
         marquee_text = (
-            " | ".join(flight_texts) if flight_texts else "No cancelled flights yet."
+            " | ".join(flight_texts)
+            if flight_texts
+            else "No cancelled flights yet."
+            # marquee_text = marquee_text +" " + " | ".join(remainingFlights) if remainingFlights else "No remaining flights."
         )
         self.marquee.updateText(marquee_text)
         # Add new labels
@@ -569,8 +590,8 @@ class MainWindow(QWidget):
 
         # Refresh the rate source so plane frequency reflects new fuel data
         self.flightData = flightData
-        self.scheduler._lambda_matrix = self.flightData.getFlightMatrix()
-        print(self.flightData.getFlightMatrix())
+        self.scheduler.updateLambdaMatrix(self.flightData.getFlightMatrix())
+        self.overlay.BackEndData = self.flightData
 
 
 def clear_layout(layout):
@@ -589,6 +610,7 @@ class Overlay(QWidget):
         self.setAttribute(QtCore.Qt.WidgetAttribute.WA_NoSystemBackground)
         self.setAttribute(QtCore.Qt.WidgetAttribute.WA_TranslucentBackground)
         self.locations = []
+        self.BackEndData = backend.doAnalysis()
 
     def paintEvent(self, event):
         if len(self.locations) < 5:
@@ -601,6 +623,26 @@ class Overlay(QWidget):
         for i in range(len(self.locations)):
             x1, y1 = self.locations[i]
             for j in range(i + 1, len(self.locations)):
+                firstCity = self.buttonList[i].city
+                secondCity = self.buttonList[j].city
+
+                cancelled = self.BackEndData.getCancelledFlights(firstCity, secondCity)
+
+                if self.availableFlights[i][j] == 0:
+                    opacity = 0.5
+                else:
+                    opacity = (
+                        self.availableFlights[i][j] - cancelled
+                    ) / self.availableFlights[i][j]
+
+                if opacity < 0:
+                    opacity = 0
+                painter.setOpacity(opacity)
+                if opacity < 1:
+                    print(
+                        f"City = {firstCity} Destination = {secondCity} Opacity =  {opacity} Cancelled = {cancelled}"
+                    )
+                    print(self.BackEndData.cancelledFlights)
                 x2, y2 = self.locations[j]
                 mx = (x1 + x2) / 2
                 my = (y1 + y2) / 2
@@ -626,3 +668,4 @@ if __name__ == "__main__":
     window = MainWindow()
     window.show()
     sys.exit(app.exec())
+
