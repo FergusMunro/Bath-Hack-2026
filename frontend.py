@@ -78,13 +78,13 @@ class PlaneSprite(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
 
-        def getImagePath(self, imageName):
+        def getImagePath(imageName):
             path = getcwd()
             path = path + ("/Images/" + imageName)
             path = path.replace("\\", "/")
             return path
         
-        original = QPixmap("Images\Plane.png")
+        original = QPixmap(getImagePath("Plane.png"))
         self.pixmap = original.scaled(
             80, 80,  
             Qt.AspectRatioMode.KeepAspectRatio,
