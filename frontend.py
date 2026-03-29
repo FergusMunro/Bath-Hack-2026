@@ -465,15 +465,6 @@ class MainWindow(QWidget):
         self.button3T.setText(str(int(flightData.getLostProfit())))
         marquee_text = " | ".join(flight_texts) if flight_texts else "No cancelled flights yet."
         self.marquee.updateText(marquee_text)
-        # Add new labels
-        for i in range(len(flightData.cancelledFlights)):
-                for j in range(len(flightData.cancelledFlights[i])):
-                    if i < j:
-                        value = flightData.cancelledFlights[j][i]
-                        if value > 0:
-                            obj = QLabel(f"{data.cities[i]} <> {data.cities[j]}: {int(value)}")
-                            self.vbox.addWidget(obj)
-
             # Update lost profit
         self.button3T.setText(str(int(flightData.getLostProfit())))
 
