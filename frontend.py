@@ -263,7 +263,10 @@ class MainWindow(QWidget):
                     if i < j:
                         value = flightData.cancelledFlights[j][i]
                         if value > 0:
-                            obj = QLabel(f"{data.cities[i]} <> {data.cities[j]}: {int(value)}")
+                            obj = QLabel(f"<b>{data.cities[i]} <> {data.cities[j]}: {int(value)} flights</b> <br>"
+                                         f"{int(flightData.getDivertedToTrain(data.cities[i], data.cities[j]))} people were diverted to train<br>"
+                                         f"{int(flightData.getUnableToFindTransport(data.cities[i], data.cities[j]))} people were unable to find transport<br>"
+                            )
                             self.vbox.addWidget(obj)
 
             # Update lost profit
