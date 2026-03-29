@@ -1,5 +1,5 @@
 from PyQt6 import QtWidgets
-from PyQt6.QtWidgets import QApplication, QPushButton, QScrollArea, QWidget, QLabel, QLineEdit, QMenu, QWidgetAction, QVBoxLayout
+from PyQt6.QtWidgets import QApplication, QPushButton, QScrollArea, QSlider, QWidget, QLabel, QLineEdit, QMenu, QWidgetAction, QVBoxLayout
 from PyQt6.QtGui import QIcon, QPainterPath, QPixmap, QPainter, QColor
 from PyQt6 import QtCore
 from PyQt6.QtCore import Qt
@@ -64,6 +64,10 @@ class MainWindow(QWidget):
         self.widget = QWidget()
         self.vbox = QVBoxLayout()
 
+        # Sliders
+        self.sliders = []
+        self.slider_labels = []
+
         # Marquee at the top
         self.marquee = Marquee(self, text="No cancelled flights yet.", speed=2)
         self.initUI()
@@ -89,6 +93,17 @@ class MainWindow(QWidget):
 
         # White sidebar
         self.rect.setStyleSheet("background-color: white;")
+
+        # Sliders setup
+        slider_names = ["Profit", "Minimise disruption", "Prioritise essential"]
+        for name in slider_names:
+            slider_label = QLabel(name, self)
+            slider_label.setStyleSheet("color: black; font-weight: bold;")
+            slider = QSlider(Qt.Orientation.Horizontal, self)
+            slider.setRange(0, 100)
+            slider.setValue(50)
+            self.sliders.append(slider)
+            self.slider_labels.append(slider_label)
 
         # Create capital city buttons
         i = 0
@@ -186,6 +201,16 @@ class MainWindow(QWidget):
         self.rect.resize(int(width * 0.25), height)
         self.rect.move(int(width * 0.75), 0)
 
+        # Sliders bottom right
+        slider_width = int(width * 0.2)
+        slider_height = int(height*0.03)
+        padding = 10
+        for i, (slider, label) in enumerate(zip(self.sliders, self.slider_labels)):
+            y = height - (len(self.sliders)-i)*(slider_height + padding + 15)
+            label.move(width - int(slider_width/1.3), y)
+            slider.setGeometry(width - int(slider_width*1.1) - padding, y + 15, slider_width, slider_height)
+            label.setText(label.text()+": "+str(slider.value()))
+
         rect_x = int(width * 0.777)
         rect_y = int(height * 0.08)
         self.button1T.move(rect_x, rect_y - int(height * 0.05))
@@ -217,7 +242,6 @@ class MainWindow(QWidget):
             data.fuel_cost[num] = float(fuelPrice.text())
         except:
             pass
-        self.update_flights()
         menu.close()
 
     def update_flights(self):
