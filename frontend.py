@@ -249,8 +249,8 @@ class MainWindow(QWidget):
 
     def update_flights(self):
         backend.updateProfitImportance(self.sliders[0].value())
-        backend.updateDisruptionImportance(self.sliders[1].value()) 
-        backend.updateEssentialImportance(self.sliders[2].value())
+        backend.updateReplacementImportance(self.sliders[1].value()) 
+        backend.updateDemandImportance(self.sliders[2].value())
         flightData = backend.doAnalysis()
         clear_layout(self.vbox)
 
