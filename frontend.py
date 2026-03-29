@@ -600,12 +600,12 @@ class Overlay(QWidget):
             return
         painter = QPainter(self)
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
-        painter.setPen(QColor("green"))
         painter.setBrush(QtCore.Qt.BrushStyle.NoBrush)
 
         for i in range(len(self.locations)):
             x1, y1 = self.locations[i]
             for j in range(i + 1, len(self.locations)):
+                painter.setPen(QColor("green"))
                 firstCity = self.buttonList[i].city
                 secondCity = self.buttonList[j].city
 
