@@ -271,8 +271,6 @@ def doAnalysis():
             trainMatrix[i, j] = cant_take_plane * subsitutionElasticityMatrix[i, j]
             unableToFindTransportMatrix[i, j] = cant_take_plane - trainMatrix[i, j]
 
-    print("running flights")
-    print(np.array(planeShedule))
     return BackEndData(
         diff, backup, oldProfit - newProfit, trainMatrix, unableToFindTransportMatrix
     )

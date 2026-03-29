@@ -164,13 +164,17 @@ class PlaneScheduler:
 
     def __init__(self, parent_window, lambda_matrix, locations_fn):
         self._parent = parent_window  # Store the main window instead of a single sprite
-        self._lambda_matrix = lambda_matrix * 400000
+        self._lambda_matrix = lambda_matrix / 100
+
         self._locations_fn = locations_fn
         self._timer = QTimer()
         self._timer.setSingleShot(True)
         self._timer.timeout.connect(self._dispatch)
 
         self.fps = 15
+
+    def updateLambdaMatrix(self, flightMatrix):
+        self._lambda_matrix = flightMatrix / 100
 
     def start(self):
         self._timer.setSingleShot(False)  # repeating timer
@@ -187,10 +191,7 @@ class PlaneScheduler:
                     if i == j:
                         continue
 
-                    # print(self._lambda_matrix)
-                    prob = 0
-                    # print(prob)
-                    # print(self._lambda_matrix[i, j])
+                    prob = 1 - np.exp(-(self._lambda_matrix[i, j]) * (self.fps / 1000))
                     u = random.random()
                     if u < prob:
                         new_plane = PlaneSprite(self._parent)
@@ -566,8 +567,7 @@ class MainWindow(QWidget):
 
         # Refresh the rate source so plane frequency reflects new fuel data
         self.flightData = flightData
-        self.scheduler._lambda_matrix = self.flightData.getFlightMatrix()
-        print(self.flightData.getFlightMatrix())
+        self.scheduler.updateLambdaMatrix(self.flightData.getFlightMatrix())
 
 
 def clear_layout(layout):
