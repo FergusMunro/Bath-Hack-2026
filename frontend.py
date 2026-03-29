@@ -589,7 +589,7 @@ class MainWindow(QWidget):
                 if i < j:
                     remaining = flightData.getNumFlights(i, j)
                     remainingFlights.append(
-                        f"{data.cities[i]} <> {data.cities[j]}: {int(remaining)} remaining"
+                        f"{data.cities[i]} <-> {data.cities[j]}: {int(remaining)} remaining"
                     )
         self.button3T.setText(str(int(flightData.getLostProfit())))
         self.button4T.setText(
@@ -672,6 +672,7 @@ class Overlay(QWidget):
 
                 painter.setPen(self.pen)
 
+                print(f"Remaining = {self.availableFlights[i][j] - cancelled} City = {firstCity} Destination = {secondCity}")
                 x2, y2 = self.locations[j]
                 mx = (x1 + x2) / 2
                 my = (y1 + y2) / 2

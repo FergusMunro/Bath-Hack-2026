@@ -14,8 +14,11 @@ subsitutionElasticityMatrix = np.loadtxt("elasticity.csv", delimiter=",")[
 
 routeMatrix = np.floor(
     (np.loadtxt("Demand_thousands.csv", delimiter=",")[:max_cities, :max_cities] / 52)
-    + 1
 )
+
+for i in range(max_cities):
+    for j in range(i):
+        routeMatrix[i, j] += 1
 # we may stop using this and generate it instead
 
 revenueMatrix = (
