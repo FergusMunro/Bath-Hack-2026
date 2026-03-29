@@ -1,4 +1,7 @@
 import numpy as np
+import pandas as pd
+
+from data import cities
 
 
 class BackEndData:
@@ -65,3 +68,13 @@ class BackEndData:
     def getTotalAffected(self):
 
         return np.sum(self.train_matrix + self.unable_to_find_transport_matrix) / 2
+
+    def exportCSV(self):
+        df = pd.DataFrame(self.getFlightMatrix(), index=cities, columns=cities).astype(
+            "string"
+        )
+        df.index.name = "Cities"
+
+        for i in range(len(df)):
+            df.iat[i, i] = "-"
+        df.to_csv("output.csv")
