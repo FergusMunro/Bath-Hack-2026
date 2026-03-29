@@ -266,12 +266,14 @@ def doAnalysis():
 
             cant_take_plane = (
                 flight_paths[i][j].DEMAND - planeShedule[i][j] * flightCapacity
-            )
+            ) * 1000
 
             trainMatrix[i, j] = cant_take_plane * subsitutionElasticityMatrix[i, j]
             unableToFindTransportMatrix[i, j] = cant_take_plane - trainMatrix[i, j]
 
-    print(diff)
     return BackEndData(
-        diff, oldProfit - newProfit, trainMatrix, unableToFindTransportMatrix
+        diff, backup, oldProfit - newProfit, trainMatrix, unableToFindTransportMatrix
     )
+
+
+doAnalysis()

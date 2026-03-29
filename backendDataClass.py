@@ -1,5 +1,10 @@
+import numpy as np
+
+
 class BackEndData:
-    def __init__(self, cancelledFlights, profit_loss, train_matrix, unable_matrix):
+    def __init__(
+        self, cancelledFlights, total_flights, profit_loss, train_matrix, unable_matrix
+    ):
 
         self.cityDict = {
             "London": 0,
@@ -14,6 +19,7 @@ class BackEndData:
             "Athens": 9,
         }
 
+        self.totalFlights = np.array(total_flights)
         self.cancelledFlights = cancelledFlights + cancelledFlights.T
         self.profit_loss = profit_loss
         self.train_matrix = train_matrix
@@ -27,6 +33,10 @@ class BackEndData:
             return self.cancelledFlights[j, i]
         else:
             return self.cancelledFlights[i, j]
+
+    def getNumFlights(self, i, j):
+
+        return self.totalFlights[i, j] - self.cancelledFlights[i, j]
 
     def getLostProfit(self):
         return self.profit_loss
