@@ -594,6 +594,7 @@ class Overlay(QWidget):
         self.setAttribute(QtCore.Qt.WidgetAttribute.WA_TranslucentBackground)
         self.locations = []
         self.BackEndData = backend.doAnalysis()
+        self.pen = QPen()
 
     def paintEvent(self, event):
         if len(self.locations) < 5:
@@ -605,7 +606,10 @@ class Overlay(QWidget):
         for i in range(len(self.locations)):
             x1, y1 = self.locations[i]
             for j in range(i + 1, len(self.locations)):
-                painter.setPen(QColor("green"))
+                self.pen.setWidth(2)
+                self.pen.setColor(QColor("green"))
+                
+                
                 firstCity = self.buttonList[i].city
                 secondCity = self.buttonList[j].city
 
@@ -623,13 +627,18 @@ class Overlay(QWidget):
 
                 painter.setOpacity(opacity)
                 if opacity < 0.75 and opacity > 0.5:
-                    painter.setPen(QColor("yellow"))
+                    self.pen.setColor(QColor("yellow"))
+                    
 
                 elif opacity <= 0.5 and opacity > 0.25:
-                    painter.setPen(QColor("red"))
+                    self.pen.setColor(QColor("red"))
+                    
 
                 elif opacity <= 0.25:
-                    painter.setPen(QColor("black"))
+                    self.pen.setColor(QColor("black"))
+    
+
+                painter.setPen(self.pen)
 
                 x2, y2 = self.locations[j]
                 mx = (x1 + x2) / 2
