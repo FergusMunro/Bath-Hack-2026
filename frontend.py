@@ -1,4 +1,5 @@
 
+from PyQt6 import QtWidgets
 from PyQt6.QtWidgets import QApplication, QPushButton, QScrollArea, QWidget, QLabel, QLineEdit, QMenu, QWidgetAction, QVBoxLayout
 from PyQt6.QtGui import QIcon, QPainterPath, QPixmap, QPainter, QColor
 from PyQt6 import QtCore
@@ -7,6 +8,7 @@ from PyQt6.QtCore import Qt
 import os
 import sys
 
+from dino import startGame
 import backend
 import backendDataClass
 import data
@@ -37,6 +39,10 @@ class MainWindow(QWidget):
         self.widget = QWidget()                 # Widget that contains the collection of Vertical Box
         self.vbox = QVBoxLayout() 
         self.initUI()
+
+    def keyPressEvent(self, event):
+        if event.key() == Qt.Key.Key_D and event.modifiers() & Qt.KeyboardModifier.ControlModifier:
+            self.dino_game = startGame()
 
     def getImagePath(self, imageName):
         path = os.getcwd()
@@ -96,8 +102,9 @@ class MainWindow(QWidget):
             menu.addAction(action)
 
             # 3. Connect the button - now it won't close the whole window
-            confirm_btn.clicked.connect(lambda _, c=city, le=line_edit, fp=fuelPrice, m=menu:self.update_all(c, le, fp, m)
-)
+            confirm_btn.clicked.connect(
+                lambda _, c=city.text(), le=line_edit, fp=fuelPrice, m=menu: self.update_all(c, le, fp, m)
+            )
                
             city_button.setMenu(menu)
 
@@ -122,12 +129,18 @@ class MainWindow(QWidget):
             """)'''
         
        # Sidebar scroll area
+        # Sidebar scroll area
         self.scroll.setParent(self)  # make it a child of MainWindow
         self.scroll.setGeometry(int(self.width()*0.77), int(self.height()*0.15), int(self.width()*0.22), int(self.height()*0.7))
         self.scroll.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOn)
         self.scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.scroll.setWidgetResizable(True)
 
+        # Container widget inside scroll area
+        self.widget.setSizePolicy(
+            QtWidgets.QSizePolicy.Policy.Expanding, 
+            QtWidgets.QSizePolicy.Policy.Expanding  # let it grow vertically
+        )
         self.widget.setLayout(self.vbox)
         self.scroll.setWidget(self.widget)
         self.scroll.setStyleSheet("""
@@ -223,20 +236,39 @@ class MainWindow(QWidget):
         self.scroll.setGeometry(int(width*0.77), int(height*0.08), int(width*0.22), int(height*0.8))
 
     def update_all(self, city, line_edit, fuelPrice, menu):
-        flightData = backend.doAnalysis()
-        print(flightData.cancelledFlights)
-        print("rgwroifwg")
-        clear_layout(self.vbox)
-        for i in range(len(flightData.cancelledFlights)):
-            for j in range(len(flightData.cancelledFlights[i])):
-             if i<j:
-              value = flightData.cancelledFlights[j][i]
-              if value > 0:
-               object = QLabel(f"{data.cities[i]} <> {data.cities[j]}: {int(value)}")
-               self.vbox.addWidget(object)
-        self.button3T.setText(str(flightData.getLostProfit()))
-        menu.close()
+            flightData = backend.doAnalysis()
+            num = flightData.cityDict[city]
 
+            # Convert QLineEdit text to float safely
+            try:
+                data.fuel_availability[num] = float(line_edit.text())
+            except ValueError:
+                data.fuel_availability[num] = 0.0
+
+            try:
+                data.fuel_cost[num] = float(fuelPrice.text())
+            except ValueError:
+                data.fuel_cost[num] = 0.0
+
+            # Re-run analysis
+            flightData = backend.doAnalysis()
+
+            # Clear old labels
+            clear_layout(self.vbox)
+
+            # Add new labels
+            for i in range(len(flightData.cancelledFlights)):
+                for j in range(len(flightData.cancelledFlights[i])):
+                    if i < j:
+                        value = flightData.cancelledFlights[j][i]
+                        if value > 0:
+                            obj = QLabel(f"{data.cities[i]} <> {data.cities[j]}: {int(value)}")
+                            self.vbox.addWidget(obj)
+
+            # Update lost profit
+            self.button3T.setText(str(flightData.getLostProfit()))
+
+            menu.close()
     
 def clear_layout(layout):
      while layout.count():
