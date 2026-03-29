@@ -307,13 +307,13 @@ class MainWindow(QWidget):
         self.rect.setStyleSheet("background-color: white;")
 
         # Sliders setup
-        slider_names = ["Profit", "Minimise disruption", "Prioritise essential"]
+        slider_names = ["Profit", "Minimise disruption", "Prioritise essential", "Overall Fuel Shortage Multiplier"]
         for name in slider_names:
             slider_label = QLabel(name, self)
             slider_label.setStyleSheet("color: black; font-weight: bold;")
             slider = QSlider(Qt.Orientation.Horizontal, self)
             slider.setRange(0, 100)
-            slider.setValue(50)
+            slider.setValue(100)
             slider.valueChanged.connect(
                 lambda val, l=slider_label, name=name: l.setText(f"{name}: {val}")
             )
@@ -344,9 +344,9 @@ class MainWindow(QWidget):
             layout = QVBoxLayout(container)
 
             line_edit = QLineEdit()
-            line_edit.setPlaceholderText(str(int(data.fuel_availability[i])))
+            line_edit.setText(str(int(data.fuel_availability[i])))
             fuelPrice = QLineEdit()
-            fuelPrice.setPlaceholderText(str(int(data.fuel_cost[i])))
+            fuelPrice.setText(str(int(data.fuel_cost[i])))
             city_label = QLabel(data.cities[i])
             i += 1
             confirm_btn = QPushButton("Confirm")
@@ -467,6 +467,7 @@ class MainWindow(QWidget):
         self.rect.move(int(width * 0.75), 0)
 
         # Sliders bottom right
+
         slider_width = int(width * 0.2)
         slider_height = int(height * 0.03)
         padding = 10
@@ -486,7 +487,8 @@ class MainWindow(QWidget):
         self.button1T.move(rect_x, rect_y - int(height * 0.05))
         self.button2T.move(rect_x, rect_y + int(height * 0.6))
         self.button3T.move(rect_x, rect_y + int(height * 0.65))
-        self.button4T.move(int(width * 0.4), int(height*0.95))
+        self.button4T.move(int(width * 0.45), int(height*0.95))
+        self.button4T.resize(int(width * 0.5), int(height * 0.05))
         self.scroll.setGeometry(
             int(width * 0.77), int(height * 0.08), int(width * 0.22), int(height * 0.6)
         )
@@ -531,6 +533,7 @@ class MainWindow(QWidget):
         backend.updateProfitImportance(self.sliders[0].value())
         backend.updateReplacementImportance(self.sliders[1].value())
         backend.updateDemandImportance(self.sliders[2].value())
+        backend.networkFuelMultiplier(self.sliders[3].value())
         flightData = backend.doAnalysis()
         clear_layout(self.vbox)
 
@@ -565,11 +568,17 @@ class MainWindow(QWidget):
                         f"{data.cities[i]} <> {data.cities[j]}: {int(remaining)} remaining"
                     )
         self.button3T.setText(str(int(flightData.getLostProfit())))
-        self.button4T.setText("Total People Affected: " + str(int(flightData.getTotalAffected())))
+        self.button4T.setText(
+            "Total People Affected: " + str(int(flightData.getTotalAffected()))
+        )
         marquee_text = (
             " | ".join(flight_texts) if flight_texts else "No cancelled flights yet."
         )
-        marquee_text = marquee_text +" " + " | ".join(remainingFlights) if remainingFlights else "No remaining flights."
+        marquee_text = (
+            marquee_text + " " + " | ".join(remainingFlights)
+            if remainingFlights
+            else "No remaining flights."
+        )
         self.marquee.updateText(marquee_text)
         # Refresh the rate source so plane frequency reflects new fuel data
         self.flightData = flightData
@@ -665,4 +674,3 @@ if __name__ == "__main__":
     window = MainWindow()
     window.show()
     sys.exit(app.exec())
-

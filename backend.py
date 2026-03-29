@@ -8,6 +8,8 @@ alpha = 1
 beta = 1
 gamma = 1
 
+fuel_multiplier = 1
+
 
 class FlightPath:  # circular flight path
     def __init__(self, start, end, fuelUse, revenue, easeOfReplacement, demand):
@@ -243,7 +245,7 @@ def calculateFuelConsumptionAtTerminal(flight_paths, routeMatrix):
 
 
 def doAnalysis():
-    terminals = initializeTerminals(fuel_availability, fuel_cost)
+    terminals = initializeTerminals(fuel_availability * fuel_multiplier, fuel_cost)
     flight_paths = initalizeFlightPaths(terminals)
 
     minProfit, maxProfit = getMinMaxProfit(flight_paths)
@@ -294,4 +296,10 @@ def updateDemandImportance(sliderVal):
     gamma = sliderVal / 100
 
 
+def networkFuelMultiplier(sliderVal):
+    global fuel_multiplier
+    fuel_multiplier = sliderVal / 100
+
+
 doAnalysis()
+
