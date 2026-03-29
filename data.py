@@ -1,16 +1,23 @@
 from inspect import indentsize
 import numpy as np
 
-max_cities = 5
+max_cities = 10
+
+flightCapacity = 0.186
 
 fuelmatrix = np.loadtxt("Fuel_spent.csv", delimiter=",")[:max_cities, :max_cities]
 
 routeMatrix = np.floor(
-    np.loadtxt("Demand_thousands.csv", delimiter=",")[:max_cities, :max_cities] / 52
+    (np.loadtxt("Demand_thousands.csv", delimiter=",")[:max_cities, :max_cities] / 52)
+    + 1
 )
 # we may stop using this and generate it instead
 
-revenueMatrix = np.loadtxt("ticket_price.csv", delimiter=",")[:max_cities, :max_cities]
+revenueMatrix = (
+    np.loadtxt("ticket_price.csv", delimiter=",")[:max_cities, :max_cities]
+    * flightCapacity
+    * 1000
+)
 
 
 def calculateFuelConsumptionAtTerminal():
@@ -32,7 +39,7 @@ def calculateFuelConsumptionAtTerminal():
 
 fuel_availability = calculateFuelConsumptionAtTerminal()
 
-fuel_cost = np.ones(5)
+fuel_cost = np.ones(max_cities)
 
 """
 subsistutionCapacityMatrix = (
@@ -50,12 +57,18 @@ subsistutionCapacityMatrix = (
 """
 
 subsitutionElasticityMatrix = np.array(
-    [  # odds of someone taking a replacememnt route
-        [0, 0.75, 0.4, 0.001, 0.45],
-        [0.75, 0, 0.001, 0.001, 0.001],
-        [0.4, 0.001, 0, 0.60, 0.65],
-        [0.001, 0.001, 0.60, 0, 0.20],
-        [0.45, 0.001, 0.65, 0.20, 0],
+    [
+        # Lon  Gla  Ams  Ber  Par  Rey  Mad  Ath  Rom  Pra
+        [0.0, 0.7, 0.8, 0.7, 0.9, 0.3, 0.6, 0.4, 0.5, 0.7],  # London
+        [0.7, 0.0, 0.6, 0.6, 0.7, 0.4, 0.5, 0.3, 0.4, 0.6],  # Glasgow
+        [0.8, 0.6, 0.0, 0.9, 0.9, 0.3, 0.7, 0.5, 0.6, 0.8],  # Amsterdam
+        [0.7, 0.6, 0.9, 0.0, 0.8, 0.2, 0.6, 0.6, 0.7, 0.9],  # Berlin
+        [0.9, 0.7, 0.9, 0.8, 0.0, 0.2, 0.8, 0.5, 0.7, 0.8],  # Paris
+        [0.3, 0.4, 0.3, 0.2, 0.2, 0.0, 0.2, 0.1, 0.2, 0.2],  # Reykjavik
+        [0.6, 0.5, 0.7, 0.6, 0.8, 0.2, 0.0, 0.6, 0.8, 0.6],  # Madrid
+        [0.4, 0.3, 0.5, 0.6, 0.5, 0.1, 0.6, 0.0, 0.9, 0.6],  # Athens
+        [0.5, 0.4, 0.6, 0.7, 0.7, 0.2, 0.8, 0.9, 0.0, 0.7],  # Rome
+        [0.7, 0.6, 0.8, 0.9, 0.8, 0.2, 0.6, 0.6, 0.7, 0.0],  # Prague
     ]
 )
 

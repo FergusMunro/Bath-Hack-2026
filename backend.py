@@ -8,8 +8,6 @@ alpha = 1
 beta = 1
 gamma = 1
 
-flightCapacity = 0.186
-
 
 class FlightPath:  # circular flight path
     def __init__(self, start, end, fuelUse, revenue, easeOfReplacement, demand):
@@ -39,7 +37,7 @@ class FlightPath:  # circular flight path
 
         heuristic = (
             alpha * profit_norm
-            + beta * self.easeOfReplacement
+            + beta * (1 - self.easeOfReplacement)
             + gamma * unfilledDemmand
         )
 
@@ -55,7 +53,18 @@ class Terminal:
 
 # heuristic: alpha *  profit / normalProfit + beta * passangersServed / maxPassangers
 
-cities = ["London", "Glasgow", "Amsterdam", "Berlin", "Paris"]
+cities = [
+    "London",
+    "Glasgow",
+    "Amsterdam",
+    "Berlin",
+    "Paris",
+    "Reykjavik",
+    "Madrid",
+    "Athens",
+    "Rome",
+    "Prague",
+]
 
 num_cities = len(cities)
 
@@ -234,7 +243,7 @@ def calculateFuelConsumptionAtTerminal(flight_paths, routeMatrix):
 
 
 def doAnalysis():
-    terminals = initializeTerminals(fuel_availability, fuel_cost)
+    terminals = initializeTerminals(fuel_availability * 0.8, fuel_cost)
     flight_paths = initalizeFlightPaths(terminals)
 
     maxConsumption = calculateFuelConsumptionAtTerminal(flight_paths, routeMatrix)
@@ -246,7 +255,6 @@ def doAnalysis():
     oldProfit = calculateTotalProfit(routeMatrix, flight_paths)
 
     planeShedule = copy.deepcopy(routeMatrix)
-    print(planeShedule)
 
     minimizeDisrupted(planeShedule, terminals, flight_paths, minProfit, maxProfit)
     newProfit = calculateTotalProfit(planeShedule, flight_paths)
@@ -265,7 +273,6 @@ def doAnalysis():
             trainMatrix[i, j] = cant_take_plane * subsitutionElasticityMatrix[i, j]
             unableToFindTransportMatrix[i, j] = cant_take_plane - trainMatrix[i, j]
 
-    print(diff)
     return BackEndData(
         diff, oldProfit - newProfit, trainMatrix, unableToFindTransportMatrix
     )
