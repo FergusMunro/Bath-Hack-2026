@@ -139,13 +139,13 @@ class PlaneSprite(QWidget):
 class PlaneScheduler:
     """Drives PlaneSprite departures via a Poisson process.
 
-    lambda_fn: () -> float  — current average departures per second (from backend)
+    lambda_matrix: () -> float  — current average departures per second (from backend)
     locations_fn: () -> list[(x, y)]  — current pixel coords of cities
     """
 
-    def __init__(self, parent_window, lambda_fn, locations_fn):
+    def __init__(self, parent_window, lambda_matrix, locations_fn):
         self._parent = parent_window  # Store the main window instead of a single sprite
-        self._lambda_fn = lambda_fn
+        self._lambda_matrix = lambda_matrix * 400000
         self._locations_fn = locations_fn
         self._timer = QTimer()
         self._timer.setSingleShot(True)
@@ -164,20 +164,38 @@ class PlaneScheduler:
     def _dispatch(self):
         locs = self._locations_fn()
         if len(locs) >= 2:
-            i, j = random.sample(range(len(locs)), 2)
-            
-            # Create a brand new plane for this specific flight
-            new_plane = PlaneSprite(self._parent)
-            new_plane.resize(self._parent.size())
-            new_plane.move(0, 0)
-            
-            # Stack it under a UI element so it doesn't block city button clicks
-            new_plane.stackUnder(self._parent.london) 
-            
-            new_plane.show()
-            new_plane.fly(QPointF(*locs[i]), QPointF(*locs[j]))
-            
-        self._schedule_next(i, j)
+            for i in range(10):
+                for j in range(10):
+                    if i == j:
+                        continue
+
+                    # print(self._lambda_matrix)
+                    prob = 0
+                    # print(prob)
+                    # print(self._lambda_matrix[i, j])
+                    u = random.random()
+                    if u < prob:
+                        new_plane = PlaneSprite(self._parent)
+                        new_plane.resize(self._parent.size())
+                        new_plane.move(0, 0)
+
+                        new_plane.stackUnder(self._parent.london)
+
+                        new_plane.show()
+
+                        new_plane.fly(QPointF(*locs[i]), QPointF(*locs[j]))
+
+
+"""
+   if len(locs) >= 2:
+        # Randomly pick two distinct cities as origin (i) and destination (j)
+        i, j = random.sample(range(len(locs)), 2)
+
+        # Create a new plane sprite for this flight
+
+    # Schedule the next plane dispatch based on this route
+    self._schedule_next(i, j)
+"""
 
 
 class MainWindow(QWidget):
@@ -229,7 +247,7 @@ class MainWindow(QWidget):
         self.flightData = backend.doAnalysis()
         self.scheduler = PlaneScheduler(
             parent_window=self,  # Pass the MainWindow as the parent
-            lambda_fn=self.flightData.getNumFlights,
+            lambda_matrix=self.flightData.getFlightMatrix(),
             locations_fn=lambda: self.overlay.locations,
         )
         self.scroll = QScrollArea()             # Scroll Area which contains the widgets, set as the centralWidget
@@ -427,7 +445,7 @@ class MainWindow(QWidget):
 
         btn_w, btn_h = int(width * 0.15), int(height * 0.06)
         self.refreshButton.setFixedSize(btn_w, btn_h)
-        self.refreshButton.move(int(width*0.01), int(height*0.93))
+        self.refreshButton.move(int(width * 0.01), int(height * 0.93))
         self.refreshButton.raise_()
 
     def update_all(self, city, line_edit, fuelPrice, menu):
@@ -465,12 +483,25 @@ class MainWindow(QWidget):
         self.button3T.setText(str(int(flightData.getLostProfit())))
         marquee_text = " | ".join(flight_texts) if flight_texts else "No cancelled flights yet."
         self.marquee.updateText(marquee_text)
-            # Update lost profit
+        # Add new labels
+        for i in range(len(flightData.cancelledFlights)):
+            for j in range(len(flightData.cancelledFlights[i])):
+                if i < j:
+                    value = flightData.cancelledFlights[j][i]
+                    if value > 0:
+                        obj = QLabel(
+                            f"{data.cities[i]} <> {data.cities[j]}: {int(value)}"
+                        )
+                        self.vbox.addWidget(obj)
+
+        # Update lost profit
+        # Update lost profit
         self.button3T.setText(str(int(flightData.getLostProfit())))
 
         # Refresh the rate source so plane frequency reflects new fuel data
         self.flightData = flightData
-        self.scheduler._lambda_fn = self.flightData.getNumFlights
+        self.scheduler._lambda_matrix = self.flightData.getFlightMatrix()
+        print(self.flightData.getFlightMatrix())
 
     
 def clear_layout(layout):
