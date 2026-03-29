@@ -369,9 +369,10 @@ class MainWindow(QWidget):
         self.button1T = QLabel("Flights Cancelled:", self)
         self.button2T = QLabel("Total Revenue Lost:", self)
         self.button3T = QLabel(self)
+        self.button4T = QLabel(self)
         self.button3T.setFixedWidth(int(self.width() * 0.5))
 
-        for boxes in [self.button1T, self.button2T, self.button3T]:
+        for boxes in [self.button1T, self.button2T, self.button3T, self.button4T]:
             boxes.setStyleSheet("""
                 color: black;
                 font-size: 22px;
@@ -479,6 +480,7 @@ class MainWindow(QWidget):
         self.button1T.move(rect_x, rect_y - int(height * 0.05))
         self.button2T.move(rect_x, rect_y + int(height * 0.6))
         self.button3T.move(rect_x, rect_y + int(height * 0.65))
+        self.button4T.move(int(width * 0.4), int(height*0.95))
         self.scroll.setGeometry(
             int(width * 0.77), int(height * 0.08), int(width * 0.22), int(height * 0.6)
         )
@@ -545,6 +547,7 @@ class MainWindow(QWidget):
                         )
 
         self.button3T.setText(str(int(flightData.getLostProfit())))
+        self.button4T.setText("Total People Affected: " + str(int(flightData.getTotalPeopleAffected())))
         marquee_text = (
             " | ".join(flight_texts) if flight_texts else "No cancelled flights yet."
         )
