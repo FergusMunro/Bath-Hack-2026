@@ -427,7 +427,7 @@ class MainWindow(QWidget):
 
         btn_w, btn_h = 180, 45
         self.refreshButton.setFixedSize(btn_w, btn_h)
-        self.refreshButton.move(width - btn_w - 16, height - btn_h - 16)
+        self.refreshButton.move(int(width*0.01), int(height*0.93))
         self.refreshButton.raise_()
 
     def updateflights(self):
