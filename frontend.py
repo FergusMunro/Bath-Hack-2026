@@ -487,7 +487,8 @@ class MainWindow(QWidget):
         self.button1T.move(rect_x, rect_y - int(height * 0.05))
         self.button2T.move(rect_x, rect_y + int(height * 0.6))
         self.button3T.move(rect_x, rect_y + int(height * 0.65))
-        self.button4T.move(int(width * 0.4), int(height * 0.95))
+        self.button4T.move(int(width * 0.45), int(height*0.95))
+        self.button4T.resize(int(width * 0.5), int(height * 0.05))
         self.scroll.setGeometry(
             int(width * 0.77), int(height * 0.08), int(width * 0.22), int(height * 0.6)
         )
@@ -608,12 +609,12 @@ class Overlay(QWidget):
             return
         painter = QPainter(self)
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
-        painter.setPen(QColor("green"))
         painter.setBrush(QtCore.Qt.BrushStyle.NoBrush)
 
         for i in range(len(self.locations)):
             x1, y1 = self.locations[i]
             for j in range(i + 1, len(self.locations)):
+                painter.setPen(QColor("green"))
                 firstCity = self.buttonList[i].city
                 secondCity = self.buttonList[j].city
 
