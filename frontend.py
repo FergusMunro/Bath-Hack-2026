@@ -1,7 +1,20 @@
 from tkinter import Menu
 
+import numpy as np
+
 from PyQt6 import QtWidgets
-from PyQt6.QtWidgets import QApplication, QPushButton, QScrollArea, QSlider, QWidget, QLabel, QLineEdit, QMenu, QWidgetAction, QVBoxLayout
+from PyQt6.QtWidgets import (
+    QApplication,
+    QPushButton,
+    QScrollArea,
+    QSlider,
+    QWidget,
+    QLabel,
+    QLineEdit,
+    QMenu,
+    QWidgetAction,
+    QVBoxLayout,
+)
 from PyQt6.QtGui import QIcon, QPainterPath, QPixmap, QPainter, QColor, QPen
 from PyQt6 import QtCore
 from PyQt6.QtCore import Qt, QTimer, QPointF
@@ -14,6 +27,8 @@ import math
 from dino import startGame
 import backend
 import data
+
+
 # ------------------- Marquee Widget -------------------
 class Marquee(QWidget):
     def __init__(self, parent=None, text="", speed=2):
@@ -23,7 +38,9 @@ class Marquee(QWidget):
         self.speed = speed
         self.label = QLabel(self)
         self.label.setStyleSheet("color:black; font-weight:bold; font-size:16px;")
-        self.setStyleSheet("background-color:white; border:2px solid darkblue; border-radius:5px;")
+        self.setStyleSheet(
+            "background-color:white; border:2px solid darkblue; border-radius:5px;"
+        )
         self.timer = QtCore.QTimer()
         self.timer.timeout.connect(self.scroll)
         self.timer.start(30)
@@ -42,6 +59,7 @@ class Marquee(QWidget):
         self.label.adjustSize()
         self.offset = self.width()
         self.label.move(self.offset, 0)
+
 
 # ------------------- Main Window -------------------
 def sample_poisson_ms(lam):
@@ -65,7 +83,7 @@ class PlaneSprite(QWidget):
 
         self._progress = 0.0
         self._p0 = QPointF(0, 0)
-        self._p1 = QPointF(0, 0)   # Bezier control point
+        self._p1 = QPointF(0, 0)  # Bezier control point
         self._p2 = QPointF(0, 0)
         self._angle = 0.0
         self.visible_plane = False
@@ -102,8 +120,8 @@ class PlaneSprite(QWidget):
 
     def _bezier_point(self, t) -> QPointF:
         u = 1.0 - t
-        x = u*u*self._p0.x() + 2*u*t*self._p1.x() + t*t*self._p2.x()
-        y = u*u*self._p0.y() + 2*u*t*self._p1.y() + t*t*self._p2.y()
+        x = u * u * self._p0.x() + 2 * u * t * self._p1.x() + t * t * self._p2.x()
+        y = u * u * self._p0.y() + 2 * u * t * self._p1.y() + t * t * self._p2.y()
         return QPointF(x, y)
 
     def _update_angle(self):
@@ -125,6 +143,7 @@ class PlaneSprite(QWidget):
         arm = 10
         thick = 4
         from PyQt6.QtGui import QPen
+
         pen = QPen(QColor(30, 30, 30))
         pen.setWidth(1)
         painter.setPen(pen)
@@ -146,38 +165,52 @@ class PlaneScheduler:
     def __init__(self, parent_window, lambda_fn, locations_fn):
         self._parent = parent_window  # Store the main window instead of a single sprite
         self._lambda_fn = lambda_fn
-        self._locations_fn = locations_fn
+        self._locations_fn = locations_fn / 30
         self._timer = QTimer()
         self._timer.setSingleShot(True)
         self._timer.timeout.connect(self._dispatch)
 
+        self.fps = 15
+
     def start(self):
-        self._schedule_next(0, 1)   # arbitrary indices for the very first interval
+        self._timer.setSingleShot(False)  # repeating timer
+        self._timer.start(int(1000 / self.fps))
 
     def stop(self):
         self._timer.stop()
 
-    def _schedule_next(self, i=0, j=1):
-        interval_ms = sample_poisson_ms(self._lambda_fn(i, j))
-        self._timer.start(interval_ms)
-
     def _dispatch(self):
         locs = self._locations_fn()
         if len(locs) >= 2:
-            i, j = random.sample(range(len(locs)), 2)
-            
-            # Create a brand new plane for this specific flight
-            new_plane = PlaneSprite(self._parent)
-            new_plane.resize(self._parent.size())
-            new_plane.move(0, 0)
-            
-            # Stack it under a UI element so it doesn't block city button clicks
-            new_plane.stackUnder(self._parent.london) 
-            
-            new_plane.show()
-            new_plane.fly(QPointF(*locs[i]), QPointF(*locs[j]))
-            
-        self._schedule_next(i, j)
+            for i in range(10):
+                for j in range(10):
+                    if i == j:
+                        continue
+
+                    prob = 1 - np.exp(-(self._locations_fn[i, j]) / self.fps)
+                    u = random.random()
+                    if u < prob:
+                        new_plane = PlaneSprite(self._parent)
+                        new_plane.resize(self._parent.size())
+                        new_plane.move(0, 0)
+
+                        new_plane.stackUnder(self._parent.london)
+
+                        new_plane.show()
+
+                        new_plane.fly(QPointF(*locs[i]), QPointF(*locs[j]))
+
+
+"""
+   if len(locs) >= 2:
+        # Randomly pick two distinct cities as origin (i) and destination (j)
+        i, j = random.sample(range(len(locs)), 2)
+
+        # Create a new plane sprite for this flight
+
+    # Schedule the next plane dispatch based on this route
+    self._schedule_next(i, j)
+"""
 
 
 class MainWindow(QWidget):
@@ -214,8 +247,8 @@ class MainWindow(QWidget):
         self.refreshButton = QPushButton("↻ Refresh Flights", self)
 
         # Plane sprite must sit above the map label but below city buttons
-                                             # bring to top first...
-        self.london.raise_()                 # ...then raise all city buttons above it
+        # bring to top first...
+        self.london.raise_()  # ...then raise all city buttons above it
         self.glasgow.raise_()
         self.amsterdam.raise_()
         self.berlin.raise_()
@@ -232,13 +265,18 @@ class MainWindow(QWidget):
             lambda_fn=self.flightData.getNumFlights,
             locations_fn=lambda: self.overlay.locations,
         )
-        self.scroll = QScrollArea()             # Scroll Area which contains the widgets, set as the centralWidget
-        self.widget = QWidget()                 # Widget that contains the collection of Vertical Box
-        self.vbox = QVBoxLayout() 
+        self.scroll = (
+            QScrollArea()
+        )  # Scroll Area which contains the widgets, set as the centralWidget
+        self.widget = QWidget()  # Widget that contains the collection of Vertical Box
+        self.vbox = QVBoxLayout()
         self.initUI()
 
     def keyPressEvent(self, event):
-        if event.key() == Qt.Key.Key_D and event.modifiers() & Qt.KeyboardModifier.ControlModifier:
+        if (
+            event.key() == Qt.Key.Key_D
+            and event.modifiers() & Qt.KeyboardModifier.ControlModifier
+        ):
             self.dino_game = startGame()
 
     def getImagePath(self, imageName):
@@ -268,15 +306,25 @@ class MainWindow(QWidget):
             slider.setRange(0, 100)
             slider.setValue(50)
             slider.valueChanged.connect(
-            lambda val, l=slider_label, name=name: l.setText(f"{name}: {val}")
-        )
+                lambda val, l=slider_label, name=name: l.setText(f"{name}: {val}")
+            )
             self.sliders.append(slider)
             self.slider_labels.append(slider_label)
 
         # Create capital city buttons
         i = 0
-        for city_button in [self.london, self.glasgow, self.amsterdam, self.berlin, self.paris,
-                            self.madrid, self.reykjavik, self.rome, self.prague, self.athens]:
+        for city_button in [
+            self.london,
+            self.glasgow,
+            self.amsterdam,
+            self.berlin,
+            self.paris,
+            self.madrid,
+            self.reykjavik,
+            self.rome,
+            self.prague,
+            self.athens,
+        ]:
             city_button.setStyleSheet(""" 
                 QPushButton {background-color: red; border: none;}
                 QPushButton::menu-indicator {image: none; width: 0px;}
@@ -293,7 +341,9 @@ class MainWindow(QWidget):
             city_label = QLabel(data.cities[i])
             i += 1
             confirm_btn = QPushButton("Confirm")
-            self.buttonList.append(Buttons(confirm_btn, line_edit, fuelPrice, menu, city_label.text()))
+            self.buttonList.append(
+                Buttons(confirm_btn, line_edit, fuelPrice, menu, city_label.text())
+            )
 
             layout.addWidget(city_label)
             layout.addWidget(line_edit)
@@ -305,7 +355,9 @@ class MainWindow(QWidget):
             menu.addAction(action)
 
             confirm_btn.clicked.connect(
-                lambda _, c=city_label.text(), le=line_edit, fp=fuelPrice, m=menu: self.update_all(c, le, fp, m)
+                lambda _, c=city_label.text(), le=line_edit, fp=fuelPrice, m=menu: self.update_all(
+                    c, le, fp, m
+                )
             )
 
             city_button.setMenu(menu)
@@ -328,7 +380,10 @@ class MainWindow(QWidget):
         self.scroll.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOn)
         self.scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.scroll.setWidgetResizable(True)
-        self.widget.setSizePolicy(QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Expanding)
+        self.widget.setSizePolicy(
+            QtWidgets.QSizePolicy.Policy.Expanding,
+            QtWidgets.QSizePolicy.Policy.Expanding,
+        )
         self.widget.setLayout(self.vbox)
         self.scroll.setWidget(self.widget)
         self.scroll.setStyleSheet("""
@@ -373,8 +428,18 @@ class MainWindow(QWidget):
         self.label.move(0, 0)
 
         # Update capitals
-        for city in [self.london, self.glasgow, self.amsterdam, self.berlin, self.paris,
-                     self.madrid, self.reykjavik, self.rome, self.prague, self.athens]:
+        for city in [
+            self.london,
+            self.glasgow,
+            self.amsterdam,
+            self.berlin,
+            self.paris,
+            self.madrid,
+            self.reykjavik,
+            self.rome,
+            self.prague,
+            self.athens,
+        ]:
             city.resize(int(width * 0.01), int(width * 0.01))
         self.london.move(int(width * 0.235), int(height * 0.52))
         self.glasgow.move(int(width * 0.212), int(height * 0.39))
@@ -393,30 +458,42 @@ class MainWindow(QWidget):
 
         # Sliders bottom right
         slider_width = int(width * 0.2)
-        slider_height = int(height*0.03)
+        slider_height = int(height * 0.03)
         padding = 10
         for i, (slider, label) in enumerate(zip(self.sliders, self.slider_labels)):
-            y = height - (len(self.sliders)-i)*(slider_height + padding + 15)
-            label.move(width - int(slider_width/1.3), y)
-            slider.setGeometry(width - int(slider_width*1.1) - padding, y + 15, slider_width, slider_height)
-            label.setText(label.text()+": "+str(slider.value()))
+            y = height - (len(self.sliders) - i) * (slider_height + padding + 15)
+            label.move(width - int(slider_width / 1.3), y)
+            slider.setGeometry(
+                width - int(slider_width * 1.1) - padding,
+                y + 15,
+                slider_width,
+                slider_height,
+            )
+            label.setText(label.text() + ": " + str(slider.value()))
 
         rect_x = int(width * 0.777)
         rect_y = int(height * 0.08)
         self.button1T.move(rect_x, rect_y - int(height * 0.05))
         self.button2T.move(rect_x, rect_y + int(height * 0.6))
         self.button3T.move(rect_x, rect_y + int(height * 0.65))
-        self.scroll.setGeometry(int(width * 0.77), int(height * 0.08), int(width * 0.22), int(height * 0.6))
+        self.scroll.setGeometry(
+            int(width * 0.77), int(height * 0.08), int(width * 0.22), int(height * 0.6)
+        )
 
         # Overlay
         self.overlay.resize(self.label.size())
         self.overlay.move(self.label.pos())
         self.overlay.locations = [
-            (int(width * 0.235), int(height * 0.52)), (int(width * 0.212), int(height * 0.39)),
-            (int(width * 0.298), int(height * 0.515)), (int(width * 0.4), int(height * 0.515)),
-            (int(width * 0.255), int(height * 0.615)), (int(width * 0.135), int(height * 0.8)),
-            (int(width * 0.12), int(height * 0.09)), (int(width * 0.387), int(height * 0.81)),
-            (int(width * 0.41), int(height * 0.588)), (int(width * 0.55), int(height * 0.9))
+            (int(width * 0.235), int(height * 0.52)),
+            (int(width * 0.212), int(height * 0.39)),
+            (int(width * 0.298), int(height * 0.515)),
+            (int(width * 0.4), int(height * 0.515)),
+            (int(width * 0.255), int(height * 0.615)),
+            (int(width * 0.135), int(height * 0.8)),
+            (int(width * 0.12), int(height * 0.09)),
+            (int(width * 0.387), int(height * 0.81)),
+            (int(width * 0.41), int(height * 0.588)),
+            (int(width * 0.55), int(height * 0.9)),
         ]
         self.overlay.update()
 
@@ -438,7 +515,9 @@ class MainWindow(QWidget):
                 if i < j:
                     value = flightData.cancelledFlights[j][i]
                     if value > 0:
-                        obj = QLabel(f"{data.cities[i]} <> {data.cities[j]}: {int(value)}")
+                        obj = QLabel(
+                            f"{data.cities[i]} <> {data.cities[j]}: {int(value)}"
+                        )
                         self.vbox.addWidget(obj)
         self.button3T.setText(str(int(flightData.getLostProfit())))
         self.flightData = flightData
@@ -455,7 +534,7 @@ class MainWindow(QWidget):
 
     def update_flights(self):
         backend.updateProfitImportance(self.sliders[0].value())
-        backend.updateReplacementImportance(self.sliders[1].value()) 
+        backend.updateReplacementImportance(self.sliders[1].value())
         backend.updateDemandImportance(self.sliders[2].value())
         flightData = backend.doAnalysis()
         clear_layout(self.vbox)
@@ -474,28 +553,34 @@ class MainWindow(QWidget):
                         )
                         obj.setWordWrap(True)
                         self.vbox.addWidget(obj)
-                        flight_texts.append(f"{data.cities[i]} <> {data.cities[j]}: {int(value)} cancelled")
+                        flight_texts.append(
+                            f"{data.cities[i]} <> {data.cities[j]}: {int(value)} cancelled"
+                        )
 
         self.button3T.setText(str(int(flightData.getLostProfit())))
-        marquee_text = " | ".join(flight_texts) if flight_texts else "No cancelled flights yet."
+        marquee_text = (
+            " | ".join(flight_texts) if flight_texts else "No cancelled flights yet."
+        )
         self.marquee.updateText(marquee_text)
         # Add new labels
         for i in range(len(flightData.cancelledFlights)):
-                for j in range(len(flightData.cancelledFlights[i])):
-                    if i < j:
-                        value = flightData.cancelledFlights[j][i]
-                        if value > 0:
-                            obj = QLabel(f"{data.cities[i]} <> {data.cities[j]}: {int(value)}")
-                            self.vbox.addWidget(obj)
+            for j in range(len(flightData.cancelledFlights[i])):
+                if i < j:
+                    value = flightData.cancelledFlights[j][i]
+                    if value > 0:
+                        obj = QLabel(
+                            f"{data.cities[i]} <> {data.cities[j]}: {int(value)}"
+                        )
+                        self.vbox.addWidget(obj)
 
-            # Update lost profit
+        # Update lost profit
         self.button3T.setText(str(int(flightData.getLostProfit())))
 
         # Refresh the rate source so plane frequency reflects new fuel data
         self.flightData = flightData
         self.scheduler._lambda_fn = self.flightData.getNumFlights
 
-    
+
 def clear_layout(layout):
     while layout.count():
         item = layout.takeAt(0)
@@ -549,3 +634,4 @@ if __name__ == "__main__":
     window = MainWindow()
     window.show()
     sys.exit(app.exec())
+
