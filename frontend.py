@@ -1,15 +1,19 @@
+from tkinter import Menu
+
 from PyQt6 import QtWidgets
 from PyQt6.QtWidgets import QApplication, QPushButton, QScrollArea, QSlider, QWidget, QLabel, QLineEdit, QMenu, QWidgetAction, QVBoxLayout
-from PyQt6.QtGui import QIcon, QPainterPath, QPixmap, QPainter, QColor
+from PyQt6.QtGui import QIcon, QPainterPath, QPixmap, QPainter, QColor, QPen
 from PyQt6 import QtCore
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import Qt, QTimer, QPointF
+
 import os
 import sys
+import random
+import math
 
 from dino import startGame
 import backend
 import data
-
 # ------------------- Marquee Widget -------------------
 class Marquee(QWidget):
     def __init__(self, parent=None, text="", speed=2):
@@ -40,6 +44,142 @@ class Marquee(QWidget):
         self.label.move(self.offset, 0)
 
 # ------------------- Main Window -------------------
+def sample_poisson_ms(lam):
+    """Return a Poisson-distributed inter-arrival interval in milliseconds.
+    lam is the average number of flights per second."""
+    if lam <= 0:
+        lam = 0.1
+    interval_s = random.expovariate(lam)
+    return max(500, int(interval_s * 1000))
+
+
+class PlaneSprite(QWidget):
+    """Transparent overlay that draws a cross-shaped plane and flies it along
+    a quadratic Bezier arc between two city coordinates."""
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setAttribute(QtCore.Qt.WidgetAttribute.WA_TransparentForMouseEvents)
+        self.setAttribute(QtCore.Qt.WidgetAttribute.WA_NoSystemBackground)
+        self.setAttribute(QtCore.Qt.WidgetAttribute.WA_TranslucentBackground)
+
+        self._progress = 0.0
+        self._p0 = QPointF(0, 0)
+        self._p1 = QPointF(0, 0)   # Bezier control point
+        self._p2 = QPointF(0, 0)
+        self._angle = 0.0
+        self.visible_plane = False
+
+        # Timer-based animation: fires every 16 ms (~60 fps)
+        self._duration_ms = 4000
+        self._elapsed_ms = 0
+        self._tick_ms = 16
+        self._anim_timer = QTimer(self)
+        self._anim_timer.setInterval(self._tick_ms)
+        self._anim_timer.timeout.connect(self._tick)
+
+    def fly(self, p0: QPointF, p2: QPointF):
+        self._p0 = p0
+        self._p2 = p2
+        mx = (p0.x() + p2.x()) / 2
+        my = (p0.y() + p2.y()) / 2
+        self._p1 = QPointF(mx, my - 90)
+        self._progress = 0.0
+        self._elapsed_ms = 0
+        self.visible_plane = True
+        self._anim_timer.start()
+
+    def _tick(self):
+        self._elapsed_ms += self._tick_ms
+        self._progress = min(1.0, self._elapsed_ms / self._duration_ms)
+        self._update_angle()
+        self.update()
+        if self._progress >= 1.0:
+            self._anim_timer.stop()
+            self.visible_plane = False
+            self.update()
+            self.deleteLater()
+
+    def _bezier_point(self, t) -> QPointF:
+        u = 1.0 - t
+        x = u*u*self._p0.x() + 2*u*t*self._p1.x() + t*t*self._p2.x()
+        y = u*u*self._p0.y() + 2*u*t*self._p1.y() + t*t*self._p2.y()
+        return QPointF(x, y)
+
+    def _update_angle(self):
+        t = max(0.001, min(0.999, self._progress))
+        dt = 0.01
+        a = self._bezier_point(t - dt)
+        b = self._bezier_point(t + dt)
+        self._angle = math.degrees(math.atan2(b.y() - a.y(), b.x() - a.x()))
+
+    def paintEvent(self, event):
+        if not self.visible_plane:
+            return
+        pos = self._bezier_point(self._progress)
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+        painter.translate(pos)
+        painter.rotate(self._angle)
+
+        arm = 10
+        thick = 4
+        from PyQt6.QtGui import QPen
+        pen = QPen(QColor(30, 30, 30))
+        pen.setWidth(1)
+        painter.setPen(pen)
+        painter.setBrush(QColor("white"))
+        # Fuselage
+        painter.drawRect(-arm, -thick // 2, arm * 2, thick)
+        # Wings
+        painter.drawRect(-thick // 2, -arm, thick, arm * 2)
+        painter.end()
+
+
+class PlaneScheduler:
+    """Drives PlaneSprite departures via a Poisson process.
+
+    lambda_fn: () -> float  — current average departures per second (from backend)
+    locations_fn: () -> list[(x, y)]  — current pixel coords of cities
+    """
+
+    def __init__(self, parent_window, lambda_fn, locations_fn):
+        self._parent = parent_window  # Store the main window instead of a single sprite
+        self._lambda_fn = lambda_fn
+        self._locations_fn = locations_fn
+        self._timer = QTimer()
+        self._timer.setSingleShot(True)
+        self._timer.timeout.connect(self._dispatch)
+
+    def start(self):
+        self._schedule_next(0, 1)   # arbitrary indices for the very first interval
+
+    def stop(self):
+        self._timer.stop()
+
+    def _schedule_next(self, i=0, j=1):
+        interval_ms = sample_poisson_ms(self._lambda_fn(i, j))
+        self._timer.start(interval_ms)
+
+    def _dispatch(self):
+        locs = self._locations_fn()
+        if len(locs) >= 2:
+            i, j = random.sample(range(len(locs)), 2)
+            
+            # Create a brand new plane for this specific flight
+            new_plane = PlaneSprite(self._parent)
+            new_plane.resize(self._parent.size())
+            new_plane.move(0, 0)
+            
+            # Stack it under a UI element so it doesn't block city button clicks
+            new_plane.stackUnder(self._parent.london) 
+            
+            new_plane.show()
+            new_plane.fly(QPointF(*locs[i]), QPointF(*locs[j]))
+            
+        self._schedule_next(i, j)
+
+
 class MainWindow(QWidget):
     buttonList = list()
 
@@ -70,6 +210,31 @@ class MainWindow(QWidget):
 
         # Marquee at the top
         self.marquee = Marquee(self, text="No cancelled flights yet.", speed=2)
+
+        self.refreshButton = QPushButton("↻ Refresh Flights", self)
+
+        # Plane sprite must sit above the map label but below city buttons
+                                             # bring to top first...
+        self.london.raise_()                 # ...then raise all city buttons above it
+        self.glasgow.raise_()
+        self.amsterdam.raise_()
+        self.berlin.raise_()
+        self.paris.raise_()
+        self.madrid.raise_()
+        self.reykjavik.raise_()
+        self.rome.raise_()
+        self.prague.raise_()
+        self.athens.raise_()
+
+        self.flightData = backend.doAnalysis()
+        self.scheduler = PlaneScheduler(
+            parent_window=self,  # Pass the MainWindow as the parent
+            lambda_fn=self.flightData.getNumFlights,
+            locations_fn=lambda: self.overlay.locations,
+        )
+        self.scroll = QScrollArea()             # Scroll Area which contains the widgets, set as the centralWidget
+        self.widget = QWidget()                 # Widget that contains the collection of Vertical Box
+        self.vbox = QVBoxLayout() 
         self.initUI()
 
     def keyPressEvent(self, event):
@@ -174,8 +339,30 @@ class MainWindow(QWidget):
 
         # Initial flight data
         self.update_flights()
+        # Refresh button (bottom-right)
+        self.refreshButton.setStyleSheet("""
+            QPushButton {
+                background-color: #2563eb;
+                color: white;
+                font-size: 16px;
+                font-weight: bold;
+                border: none;
+                border-radius: 8px;
+                padding: 10px 18px;
+            }
+            QPushButton:hover {
+                background-color: #1d4ed8;
+            }
+            QPushButton:pressed {
+                background-color: #1e40af;
+            }
+        """)
+        self.refreshButton.clicked.connect(self.updateflights)
+        self.refreshButton.raise_()
 
+        # Trigger the first sizing manually
         self.showMaximized()
+        self.scheduler.start()
 
     def resizeEvent(self, event):
         width = self.width()
@@ -238,6 +425,25 @@ class MainWindow(QWidget):
         self.marquee.move(0, 0)
         self.marquee.raise_()
 
+        btn_w, btn_h = 180, 45
+        self.refreshButton.setFixedSize(btn_w, btn_h)
+        self.refreshButton.move(width - btn_w - 16, height - btn_h - 16)
+        self.refreshButton.raise_()
+
+    def updateflights(self):
+        flightData = backend.doAnalysis()
+        clear_layout(self.vbox)
+        for i in range(len(flightData.cancelledFlights)):
+            for j in range(len(flightData.cancelledFlights[i])):
+                if i < j:
+                    value = flightData.cancelledFlights[j][i]
+                    if value > 0:
+                        obj = QLabel(f"{data.cities[i]} <> {data.cities[j]}: {int(value)}")
+                        self.vbox.addWidget(obj)
+        self.button3T.setText(str(int(flightData.getLostProfit())))
+        self.flightData = flightData
+        self.scheduler._lambda_fn = self.flightData.getNumFlights
+
     def update_all(self, city, line_edit, fuelPrice, menu):
         try:
             num = data.cities.index(city)
@@ -273,8 +479,23 @@ class MainWindow(QWidget):
         self.button3T.setText(str(int(flightData.getLostProfit())))
         marquee_text = " | ".join(flight_texts) if flight_texts else "No cancelled flights yet."
         self.marquee.updateText(marquee_text)
+        # Add new labels
+        for i in range(len(flightData.cancelledFlights)):
+                for j in range(len(flightData.cancelledFlights[i])):
+                    if i < j:
+                        value = flightData.cancelledFlights[j][i]
+                        if value > 0:
+                            obj = QLabel(f"{data.cities[i]} <> {data.cities[j]}: {int(value)}")
+                            self.vbox.addWidget(obj)
 
+            # Update lost profit
+        self.button3T.setText(str(int(flightData.getLostProfit())))
 
+        # Refresh the rate source so plane frequency reflects new fuel data
+        self.flightData = flightData
+        self.scheduler._lambda_fn = self.flightData.getNumFlights
+
+    
 def clear_layout(layout):
     while layout.count():
         item = layout.takeAt(0)

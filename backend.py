@@ -274,8 +274,6 @@ def doAnalysis():
     return BackEndData(
         diff, backup, oldProfit - newProfit, trainMatrix, unableToFindTransportMatrix
     )
-
-
 doAnalysis()
 
 
@@ -292,3 +290,4 @@ def updateReplacementImportance(sliderVal):
 def updateDemandImportance(sliderVal):
     global gamma
     gamma = sliderVal / 100
+doAnalysis()
