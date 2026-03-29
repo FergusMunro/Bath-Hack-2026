@@ -425,7 +425,7 @@ class MainWindow(QWidget):
         self.marquee.move(0, 0)
         self.marquee.raise_()
 
-        btn_w, btn_h = 180, 45
+        btn_w, btn_h = int(width * 0.15), int(height * 0.06)
         self.refreshButton.setFixedSize(btn_w, btn_h)
         self.refreshButton.move(int(width*0.01), int(height*0.93))
         self.refreshButton.raise_()
