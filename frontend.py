@@ -102,6 +102,9 @@ class MainWindow(QWidget):
             slider = QSlider(Qt.Orientation.Horizontal, self)
             slider.setRange(0, 100)
             slider.setValue(50)
+            slider.valueChanged.connect(
+            lambda val, l=slider_label, name=name: l.setText(f"{name}: {val}")
+        )
             self.sliders.append(slider)
             self.slider_labels.append(slider_label)
 
