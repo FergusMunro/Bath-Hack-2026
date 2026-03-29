@@ -112,6 +112,7 @@ class MainWindow(QWidget):
         self.button1T = QLabel("Flights Cancelled:",self)
         self.button2T = QLabel("Total Revenue Lost:",self)
         self.button3T = QLabel(self)
+        self.button3T.setFixedWidth(int(self.width() * 0.5))  
 
         for boxes in [self.button1T,self.button2T,self.button3T]:
             boxes.setStyleSheet("""
@@ -266,7 +267,7 @@ class MainWindow(QWidget):
                             self.vbox.addWidget(obj)
 
             # Update lost profit
-            self.button3T.setText(str(flightData.getLostProfit()))
+            self.button3T.setText(str(int(flightData.getLostProfit())))
 
             menu.close()
     
