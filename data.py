@@ -1,3 +1,4 @@
+from inspect import indentsize
 import numpy as np
 
 max_cities = 5
@@ -10,6 +11,28 @@ routeMatrix = np.floor(
 # we may stop using this and generate it instead
 
 revenueMatrix = np.loadtxt("ticket_price.csv", delimiter=",")[:max_cities, :max_cities]
+
+
+def calculateFuelConsumptionAtTerminal():
+    fuelConsumption = np.zeros(max_cities)
+    for cityIndex in range(max_cities):
+
+        for i in range(cityIndex):
+            fuelConsumption[cityIndex] += (
+                fuelmatrix[cityIndex, i] * routeMatrix[cityIndex, i]
+            )
+
+        for j in range(cityIndex + 1, max_cities, 1):
+            fuelConsumption[cityIndex] += (
+                fuelmatrix[j, cityIndex] * routeMatrix[j, cityIndex]
+            )
+
+    return fuelConsumption
+
+
+fuel_availability = calculateFuelConsumptionAtTerminal()
+
+fuel_cost = np.ones(5)
 
 """
 subsistutionCapacityMatrix = (

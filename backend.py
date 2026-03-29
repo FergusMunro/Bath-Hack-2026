@@ -60,11 +60,14 @@ cities = ["London", "Glasgow", "Amsterdam", "Berlin", "Paris"]
 num_cities = len(cities)
 
 
-def initializeTerminals():
+def initializeTerminals(availablility, cost):
 
     terminals = np.empty(num_cities, dtype=object)
     for i, city in enumerate(cities):
-        terminals[i] = Terminal(name=city, fuelCost=1.0, fuelAvailability=500000)
+        terminals[i] = Terminal(
+            name=city, fuelCost=cost[i], fuelAvailability=availablility[i]
+        )
+        # 100000
     return terminals
 
 
@@ -231,7 +234,7 @@ def calculateFuelConsumptionAtTerminal(flight_paths, routeMatrix):
 
 
 def doAnalysis():
-    terminals = initializeTerminals()
+    terminals = initializeTerminals(fuel_availability, fuel_cost)
     flight_paths = initalizeFlightPaths(terminals)
 
     maxConsumption = calculateFuelConsumptionAtTerminal(flight_paths, routeMatrix)
@@ -262,6 +265,7 @@ def doAnalysis():
             trainMatrix[i, j] = cant_take_plane * subsitutionElasticityMatrix[i, j]
             unableToFindTransportMatrix[i, j] = cant_take_plane - trainMatrix[i, j]
 
+    print(diff)
     return BackEndData(
         diff, oldProfit - newProfit, trainMatrix, unableToFindTransportMatrix
     )
