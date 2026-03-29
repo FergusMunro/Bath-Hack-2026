@@ -277,3 +277,18 @@ def doAnalysis():
 
 
 doAnalysis()
+
+
+def updateProfitImportance(sliderVal):
+    global alpha
+    alpha = sliderVal
+
+
+def updateReplacementImportance(sliderVal):
+    global beta
+    beta = sliderVal
+
+
+def updateDemandImportance(sliderVal):
+    global gamma
+    gamma = sliderVal
