@@ -329,8 +329,6 @@ class MainWindow(QWidget):
             )
             self.sliders.append(slider)
             self.slider_labels.append(slider_label)
-            slider.raise_()
-            slider_label.raise_()
 
         # Create capital city buttons
         i = 0
