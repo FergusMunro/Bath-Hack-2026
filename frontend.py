@@ -565,29 +565,14 @@ class MainWindow(QWidget):
                         f"{data.cities[i]} <> {data.cities[j]}: {int(remaining)} remaining"
                     )
         self.button3T.setText(str(int(flightData.getLostProfit())))
-        self.button4T.setText("Total People Affected: " + str(int(flightData.getTotalPeopleAffected())))
+        self.button4T.setText("Total People Affected: " + str(int(flightData.getTotalAffected())))
         marquee_text = (
             " | ".join(flight_texts)
             if flight_texts
             else "No cancelled flights yet."
-            # marquee_text = marquee_text +" " + " | ".join(remainingFlights) if remainingFlights else "No remaining flights."
+            #marquee_text = marquee_text +" " + " | ".join(remainingFlights) if remainingFlights else "No remaining flights."
         )
         self.marquee.updateText(marquee_text)
-        # Add new labels
-        for i in range(len(flightData.cancelledFlights)):
-            for j in range(len(flightData.cancelledFlights[i])):
-                if i < j:
-                    value = flightData.cancelledFlights[j][i]
-                    if value > 0:
-                        obj = QLabel(
-                            f"{data.cities[i]} <> {data.cities[j]}: {int(value)}"
-                        )
-                        self.vbox.addWidget(obj)
-
-        # Update lost profit
-        # Update lost profit
-        self.button3T.setText(str(int(flightData.getLostProfit())))
-
         # Refresh the rate source so plane frequency reflects new fuel data
         self.flightData = flightData
         self.scheduler.updateLambdaMatrix(self.flightData.getFlightMatrix())
