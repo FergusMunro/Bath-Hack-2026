@@ -486,7 +486,7 @@ class MainWindow(QWidget):
         self.button1T.move(rect_x, rect_y - int(height * 0.05))
         self.button2T.move(rect_x, rect_y + int(height * 0.6))
         self.button3T.move(rect_x, rect_y + int(height * 0.65))
-        self.button4T.move(int(width * 0.4), int(height*0.95))
+        self.button4T.move(int(width * 0.4), int(height * 0.95))
         self.scroll.setGeometry(
             int(width * 0.77), int(height * 0.08), int(width * 0.22), int(height * 0.6)
         )
@@ -565,11 +565,18 @@ class MainWindow(QWidget):
                         f"{data.cities[i]} <> {data.cities[j]}: {int(remaining)} remaining"
                     )
         self.button3T.setText(str(int(flightData.getLostProfit())))
-        self.button4T.setText("Total People Affected: " + str(int(flightData.getTotalAffected())))
+        self.button4T.setText(
+            "Total People Affected: " + str(int(flightData.getTotalAffected()))
+        )
+        print(flightData.train_matrix)
         marquee_text = (
             " | ".join(flight_texts) if flight_texts else "No cancelled flights yet."
         )
-        marquee_text = marquee_text +" " + " | ".join(remainingFlights) if remainingFlights else "No remaining flights."
+        marquee_text = (
+            marquee_text + " " + " | ".join(remainingFlights)
+            if remainingFlights
+            else "No remaining flights."
+        )
         self.marquee.updateText(marquee_text)
         # Refresh the rate source so plane frequency reflects new fuel data
         self.flightData = flightData
@@ -625,7 +632,7 @@ class Overlay(QWidget):
                     print(
                         f"City = {firstCity} Destination = {secondCity} Opacity =  {opacity} Cancelled = {cancelled}"
                     )
-                    print(self.BackEndData.cancelledFlights)
+                    # print(self.BackEndData.cancelledFlights)
                 x2, y2 = self.locations[j]
                 mx = (x1 + x2) / 2
                 my = (y1 + y2) / 2
@@ -651,4 +658,3 @@ if __name__ == "__main__":
     window = MainWindow()
     window.show()
     sys.exit(app.exec())
-
