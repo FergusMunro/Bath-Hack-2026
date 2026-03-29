@@ -77,6 +77,19 @@ class PlaneSprite(QWidget):
 
     def __init__(self, parent=None):
         super().__init__(parent)
+
+        def getImagePath(self, imageName):
+            path = os.getcwd()
+            path = path + ("/Images/" + imageName)
+            path = path.replace("\\", "/")
+            return path
+        
+        original = QPixmap("Images\Plane.png")
+        self.pixmap = original.scaled(
+            30, 30,  
+            Qt.AspectRatioMode.KeepAspectRatio,
+            Qt.TransformationMode.SmoothTransformation
+        )
         self.setAttribute(QtCore.Qt.WidgetAttribute.WA_TransparentForMouseEvents)
         self.setAttribute(QtCore.Qt.WidgetAttribute.WA_NoSystemBackground)
         self.setAttribute(QtCore.Qt.WidgetAttribute.WA_TranslucentBackground)
@@ -134,25 +147,22 @@ class PlaneSprite(QWidget):
     def paintEvent(self, event):
         if not self.visible_plane:
             return
+
         pos = self._bezier_point(self._progress)
+
         painter = QPainter(self)
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+
         painter.translate(pos)
         painter.rotate(self._angle)
 
-        arm = 10
-        thick = 4
-        from PyQt6.QtGui import QPen
+        painter.drawPixmap(
+            QPointF(-self.pixmap.width() / 2, -self.pixmap.height() / 2),
+            self.pixmap
+        )
 
-        pen = QPen(QColor(30, 30, 30))
-        pen.setWidth(1)
-        painter.setPen(pen)
-        painter.setBrush(QColor("white"))
-        # Fuselage
-        painter.drawRect(-arm, -thick // 2, arm * 2, thick)
-        # Wings
-        painter.drawRect(-thick // 2, -arm, thick, arm * 2)
         painter.end()
+
 
 
 class PlaneScheduler:
