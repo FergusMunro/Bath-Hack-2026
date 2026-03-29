@@ -158,14 +158,14 @@ class PlaneSprite(QWidget):
 class PlaneScheduler:
     """Drives PlaneSprite departures via a Poisson process.
 
-    lambda_fn: () -> float  — current average departures per second (from backend)
+    lambda_matrix: () -> float  — current average departures per second (from backend)
     locations_fn: () -> list[(x, y)]  — current pixel coords of cities
     """
 
-    def __init__(self, parent_window, lambda_fn, locations_fn):
+    def __init__(self, parent_window, lambda_matrix, locations_fn):
         self._parent = parent_window  # Store the main window instead of a single sprite
-        self._lambda_fn = lambda_fn
-        self._locations_fn = locations_fn / 30
+        self._lambda_matrix = lambda_matrix * 400000
+        self._locations_fn = locations_fn
         self._timer = QTimer()
         self._timer.setSingleShot(True)
         self._timer.timeout.connect(self._dispatch)
@@ -187,7 +187,10 @@ class PlaneScheduler:
                     if i == j:
                         continue
 
-                    prob = 1 - np.exp(-(self._locations_fn[i, j]) / self.fps)
+                    # print(self._lambda_matrix)
+                    prob = 0
+                    # print(prob)
+                    # print(self._lambda_matrix[i, j])
                     u = random.random()
                     if u < prob:
                         new_plane = PlaneSprite(self._parent)
@@ -262,7 +265,7 @@ class MainWindow(QWidget):
         self.flightData = backend.doAnalysis()
         self.scheduler = PlaneScheduler(
             parent_window=self,  # Pass the MainWindow as the parent
-            lambda_fn=self.flightData.getNumFlights,
+            lambda_matrix=self.flightData.getFlightMatrix(),
             locations_fn=lambda: self.overlay.locations,
         )
         self.scroll = (
@@ -504,28 +507,9 @@ class MainWindow(QWidget):
 
         btn_w, btn_h = int(width * 0.15), int(height * 0.06)
         self.refreshButton.setFixedSize(btn_w, btn_h)
-        self.refreshButton.move(int(width*0.01), int(height*0.93))
+        self.refreshButton.move(int(width * 0.01), int(height * 0.93))
         self.refreshButton.raise_()
 
-<<<<<<< HEAD
-    def updateflights(self):
-        flightData = backend.doAnalysis()
-        clear_layout(self.vbox)
-        for i in range(len(flightData.cancelledFlights)):
-            for j in range(len(flightData.cancelledFlights[i])):
-                if i < j:
-                    value = flightData.cancelledFlights[j][i]
-                    if value > 0:
-                        obj = QLabel(
-                            f"{data.cities[i]} <> {data.cities[j]}: {int(value)}"
-                        )
-                        self.vbox.addWidget(obj)
-        self.button3T.setText(str(int(flightData.getLostProfit())))
-        self.flightData = flightData
-        self.scheduler._lambda_fn = self.flightData.getNumFlights
-
-=======
->>>>>>> 2a1bc65a1519fbc3bacbcbe1ff7dc03c1a438da4
     def update_all(self, city, line_edit, fuelPrice, menu):
         try:
             num = data.cities.index(city)
@@ -565,7 +549,6 @@ class MainWindow(QWidget):
             " | ".join(flight_texts) if flight_texts else "No cancelled flights yet."
         )
         self.marquee.updateText(marquee_text)
-<<<<<<< HEAD
         # Add new labels
         for i in range(len(flightData.cancelledFlights)):
             for j in range(len(flightData.cancelledFlights[i])):
@@ -578,14 +561,13 @@ class MainWindow(QWidget):
                         self.vbox.addWidget(obj)
 
         # Update lost profit
-=======
-            # Update lost profit
->>>>>>> 2a1bc65a1519fbc3bacbcbe1ff7dc03c1a438da4
+        # Update lost profit
         self.button3T.setText(str(int(flightData.getLostProfit())))
 
         # Refresh the rate source so plane frequency reflects new fuel data
         self.flightData = flightData
-        self.scheduler._lambda_fn = self.flightData.getNumFlights
+        self.scheduler._lambda_matrix = self.flightData.getFlightMatrix()
+        print(self.flightData.getFlightMatrix())
 
 
 def clear_layout(layout):
@@ -641,4 +623,3 @@ if __name__ == "__main__":
     window = MainWindow()
     window.show()
     sys.exit(app.exec())
-

@@ -19,7 +19,7 @@ class BackEndData:
             "Athens": 9,
         }
 
-        self.totalFlights = np.array(total_flights)
+        self.totalFlights = np.array(total_flights) + np.array(total_flights).T
         self.cancelledFlights = cancelledFlights + cancelledFlights.T
         self.profit_loss = profit_loss
         self.train_matrix = train_matrix
@@ -37,6 +37,9 @@ class BackEndData:
     def getNumFlights(self, i, j):
 
         return self.totalFlights[i, j] - self.cancelledFlights[i, j]
+
+    def getFlightMatrix(self):
+        return self.totalFlights - self.cancelledFlights
 
     def getLostProfit(self):
         return self.profit_loss
