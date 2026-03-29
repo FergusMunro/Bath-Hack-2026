@@ -243,7 +243,7 @@ def calculateFuelConsumptionAtTerminal(flight_paths, routeMatrix):
 
 
 def doAnalysis():
-    terminals = initializeTerminals(fuel_availability * 0.8, fuel_cost)
+    terminals = initializeTerminals(fuel_availability, fuel_cost)
     flight_paths = initalizeFlightPaths(terminals)
 
     maxConsumption = calculateFuelConsumptionAtTerminal(flight_paths, routeMatrix)
@@ -276,6 +276,3 @@ def doAnalysis():
     return BackEndData(
         diff, oldProfit - newProfit, trainMatrix, unableToFindTransportMatrix
     )
-
-
-doAnalysis()

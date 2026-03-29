@@ -7,6 +7,11 @@ flightCapacity = 0.186
 
 fuelmatrix = np.loadtxt("Fuel_spent.csv", delimiter=",")[:max_cities, :max_cities]
 
+subsitutionElasticityMatrix = np.loadtxt("elasticity.csv", delimiter=",")[
+    :max_cities, :max_cities
+]
+
+
 routeMatrix = np.floor(
     (np.loadtxt("Demand_thousands.csv", delimiter=",")[:max_cities, :max_cities] / 52)
     + 1
@@ -55,22 +60,6 @@ subsistutionCapacityMatrix = (
     / 51
 )
 """
-
-subsitutionElasticityMatrix = np.array(
-    [
-        # Lon  Gla  Ams  Ber  Par  Rey  Mad  Ath  Rom  Pra
-        [0.0, 0.7, 0.8, 0.7, 0.9, 0.3, 0.6, 0.4, 0.5, 0.7],  # London
-        [0.7, 0.0, 0.6, 0.6, 0.7, 0.4, 0.5, 0.3, 0.4, 0.6],  # Glasgow
-        [0.8, 0.6, 0.0, 0.9, 0.9, 0.3, 0.7, 0.5, 0.6, 0.8],  # Amsterdam
-        [0.7, 0.6, 0.9, 0.0, 0.8, 0.2, 0.6, 0.6, 0.7, 0.9],  # Berlin
-        [0.9, 0.7, 0.9, 0.8, 0.0, 0.2, 0.8, 0.5, 0.7, 0.8],  # Paris
-        [0.3, 0.4, 0.3, 0.2, 0.2, 0.0, 0.2, 0.1, 0.2, 0.2],  # Reykjavik
-        [0.6, 0.5, 0.7, 0.6, 0.8, 0.2, 0.0, 0.6, 0.8, 0.6],  # Madrid
-        [0.4, 0.3, 0.5, 0.6, 0.5, 0.1, 0.6, 0.0, 0.9, 0.6],  # Athens
-        [0.5, 0.4, 0.6, 0.7, 0.7, 0.2, 0.8, 0.9, 0.0, 0.7],  # Rome
-        [0.7, 0.6, 0.8, 0.9, 0.8, 0.2, 0.6, 0.6, 0.7, 0.0],  # Prague
-    ]
-)
 
 
 cities = [
