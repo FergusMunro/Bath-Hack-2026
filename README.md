@@ -1,4 +1,5 @@
-Helping airlines minimize impact to their operations during a crisis.
+# Flight Cutter
+#### Helping airlines minimize impact to their operations during a crisis.
 
 ## Inspiration
 
