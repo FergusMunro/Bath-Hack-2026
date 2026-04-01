@@ -1,6 +1,9 @@
 # Flight Cutter
 #### Helping airlines minimize impact to their operations during a crisis.
 
+<img width="1905" height="1034" alt="image" src="https://github.com/user-attachments/assets/790e8e06-3ad7-4ca2-92e5-4a696a21375e" />
+
+
 ## Inspiration
 
 The US-Iran war and the closing of the Strait of Hormuz have launched shockwaves across global supply chains, causing acute shortages of brent crude, liquified natural gas and diesel. Of particular note is the disruption of Jet Fuel, both in Asian and European markets. After April 11th, the final shipment will arrive in Europe, with Jet Fuel expected to become 40% scarcer [1], meaning airlines must begin making difficult decisions and begin limiting service.
